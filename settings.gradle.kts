@@ -17,5 +17,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "kn-jvm"
 includeBuild("insidePlugin")
-include(":native-app")
+include(":lib")
 include(":app")

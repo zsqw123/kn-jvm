@@ -1,6 +1,5 @@
 plugins {
     kotlin("multiplatform")
-    id("inside")
 }
 
 group = "me.zsqw123"
