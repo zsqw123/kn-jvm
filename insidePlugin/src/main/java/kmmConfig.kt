@@ -1,7 +1,6 @@
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.konan.target.KonanTarget
 
 private val Project.kotlin: KotlinMultiplatformExtension
     get() = extensions.getByType(KotlinMultiplatformExtension::class.java)
@@ -15,7 +14,9 @@ fun Project.configKmmTargets(vararg targetPlatforms: String) = kotlin.apply {
     }
     sourceSets.apply {
         val commonMain = getByName("commonMain")
-        val commonTest = getByName("commonTest")
+        val commonTest = getByName("commonTest") {
+            it.dependsOn(commonMain)
+        }
         val multithreadedMain = create("multithreadedMain").apply {
             dependsOn(commonMain)
         }

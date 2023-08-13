@@ -1,6 +1,10 @@
 plugins {
     id("com.android.application")
-//    kotlin("android")
+    id("org.jetbrains.kotlin.android")
+}
+
+kotlin {
+    jvmToolchain(11)
 }
 
 android {
@@ -13,7 +17,6 @@ android {
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
-
     }
 
     buildTypes {
@@ -26,9 +29,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-//    kotlinOptions {
-//        jvmTarget = "1.8"
-//    }
     buildFeatures {
         viewBinding = true
     }
