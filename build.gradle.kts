@@ -1,8 +1,3 @@
-group = "me.zsqw123"
-version = "1.0-SNAPSHOT"
-
-allprojects{
-    repositories {
-        mavenCentral()
-    }
+plugins {
+    id("com.android.application") version agpVersion apply false
 }
