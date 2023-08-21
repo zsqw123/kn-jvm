@@ -15,6 +15,11 @@ kotlin {
                 executable()
             }
         }
+        linuxX64 {
+            binaries {
+                executable()
+            }
+        }
         jvm {
             mainRun {
                 mainClass = "MainKt"

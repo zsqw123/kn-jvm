@@ -10,6 +10,6 @@ actual fun showDialog(content: String): Unit = memScoped {
     bufPtr[0] = (MAX_COMPUTERNAME_LENGTH + 1).toUInt()
     GetComputerNameW(infoPtr, bufPtr)
 
-    val name = CharArray(infoBuf.size) { infoBuf[it].toInt().toChar() }.concatToString()
-    MessageBoxW(null, "$content\ncomputerName: $name", content, MB_OK.toUInt())
+    val name = infoPtr.toKString()
+    MessageBoxW(null, "$content\ncomputerName: $name!", content, MB_OK.toUInt())
 }

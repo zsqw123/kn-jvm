@@ -1,3 +1,3 @@
-actual fun showDialog(content: String): Unit {
-    // ignore
+actual fun showDialog(content: String) {
+    println(content.replace("Native", "Linux"))
 }
