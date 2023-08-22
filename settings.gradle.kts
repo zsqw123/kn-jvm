@@ -17,5 +17,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "kn-jvm"
 includeBuild("insidePlugin")
-include(":demo")
+
 include(":app")
+include(":demo")
+include(":demo-kni")
+include(":android-demo")
