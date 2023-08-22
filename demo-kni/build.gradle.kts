@@ -12,18 +12,23 @@ val sharedLibraryName = "zsuDemo"
 
 kotlin {
     sourceSets {
-        mingwX64 {
-            binaries {
-                sharedLib(sharedLibraryName) {
-                    linkTask.doLast {
-                        copy {
-                            from(outputFile)
-                            into(jniSourceRoot)
-                        }
-                    }
+        val jvmTarget = jvm {
+            mainRun {
+                mainClass = "zsu.native.demo.MainKt"
+            }
+        }
+        val jvmCompileTask: Task = jvmTarget.compilations["main"].compileTaskProvider.get()
 
-                    tasks.getByName("compileKotlinJvm").dependsOn(linkTask)
+        mingwX64 {
+            binaries.sharedLib(sharedLibraryName) {
+                linkTask.doLast {
+                    copy {
+                        from(outputFile)
+                        into(jniSourceRoot)
+                    }
                 }
+
+                jvmCompileTask.dependsOn(linkTask)
             }
             compilations["main"].cinterops.create("jni") {
                 val javaHome = File(System.getProperty("java.home"))
@@ -34,12 +39,6 @@ kotlin {
                     File(javaHome, "include/linux"),
                     File(javaHome, "include/win32")
                 )
-            }
-        }
-
-        jvm {
-            mainRun {
-                mainClass = "zsu.native.demo.MainKt"
             }
         }
     }
