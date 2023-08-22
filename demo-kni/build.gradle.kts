@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-
 plugins {
     kotlin("multiplatform")
     id("org.openjfx.javafxplugin") version "0.0.5"
@@ -30,7 +28,7 @@ kotlin {
             compilations["main"].cinterops.create("jni") {
                 val javaHome = File(System.getProperty("java.home"))
                 packageName = "zsu.jni"
-                includeDirs(
+                includeDirs.allHeadersDirs += files(
                     File(javaHome, "include"),
                     File(javaHome, "include/darwin"),
                     File(javaHome, "include/linux"),
