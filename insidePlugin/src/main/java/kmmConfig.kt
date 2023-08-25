@@ -37,13 +37,9 @@ fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kotlin.apply {
         val commonTest = getByName("commonTest") {
             it.dependsOn(commonMain)
         }
-        val multithreadedMain = create("multithreadedMain").apply {
+        val nativeMain = create("nativeMain").apply {
             dependsOn(commonMain)
         }
-        val nativeMain = create("nativeMain").apply {
-            dependsOn(multithreadedMain)
-        }
-
         targets.withType(KotlinNativeTarget::class.java) {
             it.compilations.apply {
                 getByName("main").defaultSourceSet.dependsOn(nativeMain)
