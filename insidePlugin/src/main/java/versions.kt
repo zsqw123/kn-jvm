@@ -1,1 +1,0 @@
-const val kotlinVersion = "1.9.0"

@@ -1,6 +1,8 @@
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetPreset
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 import java.io.File
 
@@ -9,7 +11,21 @@ private val Project.kotlin: KotlinMultiplatformExtension
 
 val Project.jniSourceRoot: File get() = File(buildDir, "generated/jniLibs")
 
-fun Project.configKmmTargets(vararg targetPlatforms: String) = kotlin.apply {
+val Project.allNativePresets: Array<String>
+    get() = kotlin.presets
+        .filterIsInstance<KotlinNativeTargetPreset>()
+        .mapArray { it.name }
+
+val Project.allJvmPresets: Array<String>
+    get() = kotlin.presets
+        .filterIsInstance<KotlinJvmTargetPreset>()
+        .mapArray { it.name }
+
+private inline fun <T, reified R> List<T>.mapArray(transform: (T) -> R): Array<R> {
+    return Array(size) { transform(get(it)) }
+}
+
+fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kotlin.apply {
     val targetPresets = presets.matching { it.name in targetPlatforms }
     targetPresets.forEach {
         if (targets.findByName(it.name) == null) {

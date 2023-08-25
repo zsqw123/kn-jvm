@@ -1,12 +1,13 @@
 plugins {
     kotlin("multiplatform")
-    id("org.openjfx.javafxplugin") version "0.0.5"
+    id("org.openjfx.javafxplugin")
+    id("com.google.devtools.ksp")
 }
 
 group = "me.zsqw123"
 version = "1.0-SNAPSHOT"
 
-configKmmTargets("jvm", "mingwX64")
+configKmmSourceSet("jvm", "mingwX64")
 
 val sharedLibraryName = "zsuDemo"
 
@@ -42,4 +43,10 @@ kotlin {
             }
         }
     }
+}
+
+dependencies {
+    add("kspCommonMainMetadata", project(":ksp"))
+    add("kspJvm", project(":ksp"))
+    add("kspMingwX64", project(":ksp"))
 }
