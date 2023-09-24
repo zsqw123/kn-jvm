@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform")
-    id("org.openjfx.javafxplugin")
+    kotlin("plugin.serialization")
     id("com.google.devtools.ksp")
 }
 
@@ -46,7 +46,11 @@ kotlin {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", project(":ksp"))
-    add("kspJvm", project(":ksp"))
-    add("kspMingwX64", project(":ksp"))
+    kspCommon(":ksp")
+    kspJvm(":ksp")
+    kspMingwX64(":ksp")
+}
+
+commonMainDependencies {
+    implementation(D.pb)
 }

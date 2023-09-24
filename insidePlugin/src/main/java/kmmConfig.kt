@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetPreset
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 import java.io.File
 
-private val Project.kotlin: KotlinMultiplatformExtension
+internal val Project.kotlin: KotlinMultiplatformExtension
     get() = extensions.getByType(KotlinMultiplatformExtension::class.java)
 
 val Project.jniSourceRoot: File get() = File(buildDir, "generated/jniLibs")
