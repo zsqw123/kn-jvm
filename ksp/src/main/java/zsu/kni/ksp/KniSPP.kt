@@ -14,21 +14,20 @@ class KniSPP : SymbolProcessorProvider {
     }
 }
 
-class KniCommonSP(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
+private class KniCommonSP(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         TODO("Not yet implemented")
     }
 }
 
-class KniNativeSP(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
+private class KniNativeSP(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         TODO("Not yet implemented")
     }
 }
 
-class KniJvmSP(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
+private class KniJvmSP(private val env: SymbolProcessorEnvironment) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         TODO("Not yet implemented")
     }
-
 }

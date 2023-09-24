@@ -19,7 +19,7 @@ rootProject.name = "kn-jvm"
 includeBuild("insidePlugin")
 
 include(":app")
-include(":demo")
+include(":demo-dialog")
 include(":demo-kni")
 include(":android-demo")
 include(":ksp")
