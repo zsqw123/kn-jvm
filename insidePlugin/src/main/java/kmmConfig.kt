@@ -13,23 +13,22 @@ internal val Project.kme: KotlinMultiplatformExtension
 
 val Project.jniSourceRoot: File get() = File(buildDir, "generated/jniLibs")
 
-private val deprecatedPresets = KonanTarget.deprecatedTargets
+private val deprecatedNativePresets = KonanTarget.deprecatedTargets
     .map { it.presetName }.toSet()
 
-private val allValidPresetNames = KonanTarget.predefinedTargets.values
-    .filterNot { it.presetName in deprecatedPresets }
-    .map { it.presetName }.toSet()
+private val allValidNativePresetNames = KonanTarget.predefinedTargets.values
+    .map { it.presetName }
+    .filterNot { it in deprecatedNativePresets }.toSet()
 
 val Project.allNativePresets: Array<String>
     get() = kme.presets
         .filterIsInstance<KotlinNativeTargetPreset>()
-        .filter { it.name in allValidPresetNames }
+        .filter { it.name in allValidNativePresetNames }
         .mapArray { it.name }
 
 val Project.allJvmPresets: Array<String>
     get() = kme.presets
         .filterIsInstance<KotlinJvmTargetPreset>()
-        .filter { it.name in allValidPresetNames }
         .mapArray { it.name }
 
 private inline fun <T, reified R> List<T>.mapArray(transform: (T) -> R): Array<R> {
