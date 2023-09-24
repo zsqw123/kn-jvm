@@ -1,6 +1,5 @@
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.jetbrains.kotlin.gradle.plugin.HasKotlinDependencies
 import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 
 @Suppress("ConstPropertyName")
@@ -41,6 +40,7 @@ fun DependencyHandler.addDeps(configurationName: String, dependencyPath: String)
 }
 
 fun Project.commonMainDependencies(configure: KotlinDependencyHandler.() -> Unit) {
-    val commonMainSourceSet = kotlin.sourceSets.named("commonMain") as HasKotlinDependencies
-    commonMainSourceSet.dependencies(configure)
+    kotlin.sourceSets.named("commonMain").configure {
+        it.dependencies(configure)
+    }
 }
