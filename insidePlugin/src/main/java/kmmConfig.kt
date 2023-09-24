@@ -4,28 +4,39 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetPreset
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
+import org.jetbrains.kotlin.konan.target.KonanTarget
+import org.jetbrains.kotlin.konan.target.presetName
 import java.io.File
 
-internal val Project.kotlin: KotlinMultiplatformExtension
+internal val Project.kme: KotlinMultiplatformExtension
     get() = extensions.getByType(KotlinMultiplatformExtension::class.java)
 
 val Project.jniSourceRoot: File get() = File(buildDir, "generated/jniLibs")
 
+private val deprecatedPresets = KonanTarget.deprecatedTargets
+    .map { it.presetName }.toSet()
+
+private val allValidPresetNames = KonanTarget.predefinedTargets.values
+    .filterNot { it.presetName in deprecatedPresets }
+    .map { it.presetName }.toSet()
+
 val Project.allNativePresets: Array<String>
-    get() = kotlin.presets
+    get() = kme.presets
         .filterIsInstance<KotlinNativeTargetPreset>()
+        .filter { it.name in allValidPresetNames }
         .mapArray { it.name }
 
 val Project.allJvmPresets: Array<String>
-    get() = kotlin.presets
+    get() = kme.presets
         .filterIsInstance<KotlinJvmTargetPreset>()
+        .filter { it.name in allValidPresetNames }
         .mapArray { it.name }
 
 private inline fun <T, reified R> List<T>.mapArray(transform: (T) -> R): Array<R> {
     return Array(size) { transform(get(it)) }
 }
 
-fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kotlin.apply {
+fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
     val targetPresets = presets.matching { it.name in targetPlatforms }
     targetPresets.forEach {
         if (targets.findByName(it.name) == null) {

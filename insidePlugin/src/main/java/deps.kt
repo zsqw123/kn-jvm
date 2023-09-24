@@ -40,7 +40,7 @@ fun DependencyHandler.addDeps(configurationName: String, dependencyPath: String)
 }
 
 fun Project.commonMainDependencies(configure: KotlinDependencyHandler.() -> Unit) {
-    kotlin.sourceSets.named("commonMain").configure {
+    kme.sourceSets.named("commonMain").configure {
         it.dependencies(configure)
     }
 }
