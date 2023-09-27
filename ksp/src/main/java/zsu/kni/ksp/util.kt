@@ -1,2 +1,0 @@
-package zsu.kni.ksp
-
