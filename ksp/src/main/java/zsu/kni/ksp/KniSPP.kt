@@ -31,3 +31,14 @@ private class KniJvmSP(private val env: SymbolProcessorEnvironment) : SymbolProc
         TODO("Not yet implemented")
     }
 }
+
+class Option(env: SymbolProcessorEnvironment) {
+    private val options = env.options
+    val generatedPackage = env.options["kni-generated-package"] ?: "zsu.kni.generated"
+
+    // for android, normally "platform.android"
+    val jniPackage = env.options["kni-jni-package"] ?: throw IllegalArgumentException(
+        "must specify jni package(which contains jint, jstring...) through ksp argument: `kni-jni-package`. " +
+                "For Android platform, usually `platform.android`."
+    )
+}

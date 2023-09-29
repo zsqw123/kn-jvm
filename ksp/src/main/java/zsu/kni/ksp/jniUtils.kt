@@ -49,17 +49,15 @@ fun KSFunctionDeclaration.getJniName(resolver: Resolver): JniFuncName = buildStr
  * [JNI Design Spec](https://docs.oracle.com/en/java/javase/17/docs/specs/jni/design.html#resolving-native-method-names)
  */
 private fun String.mangled(): String = buildString {
-    for (c in this@mangled) {
-        when (c) {
-            '/' -> append("_")
-            '_' -> append("_1")
-            ';' -> append("_2")
-            '[' -> append("_3")
-            in '0'..'9', in 'a'..'z', in 'A'..'Z' -> append(c)
-            else -> {
-                append("_0")
-                append(String.format("%04x", c.code))
-            }
+    for (c in this@mangled) when (c) {
+        '/' -> append("_")
+        '_' -> append("_1")
+        ';' -> append("_2")
+        '[' -> append("_3")
+        in '0'..'9', in 'a'..'z', in 'A'..'Z' -> append(c)
+        else -> {
+            append("_0")
+            append(String.format("%04x", c.code))
         }
     }
 }
