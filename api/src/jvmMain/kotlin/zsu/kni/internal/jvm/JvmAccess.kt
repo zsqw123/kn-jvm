@@ -1,4 +1,4 @@
-package zsu.kni.internal
+package zsu.kni.internal.jvm
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
