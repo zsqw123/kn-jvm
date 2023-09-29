@@ -2,7 +2,7 @@ plugins {
     kotlin("multiplatform")
 }
 
-configKmmSourceSet(*allNativePresets, *allJvmPresets)
+configKmmSourceSet(*neededNativePresets, *allJvmPresets)
 
 commonMainDependencies {
     implementation(D.pb)

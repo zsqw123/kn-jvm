@@ -31,7 +31,7 @@ fun DependencyHandler.kspMingwX64(dependencyPath: String) {
 /**
  * @param dependencyPath maven artifact full-id or project path start with `:`
  */
-fun DependencyHandler.addDeps(configurationName: String, dependencyPath: String) {
+private fun DependencyHandler.addDeps(configurationName: String, dependencyPath: String) {
     if (dependencyPath.startsWith(":")) {
         add(configurationName, project(mapOf("path" to dependencyPath)))
     } else {

@@ -51,4 +51,5 @@ dependencies {
 
 commonMainDependencies {
     implementation(D.pb)
+    implementation(project(":api"))
 }
