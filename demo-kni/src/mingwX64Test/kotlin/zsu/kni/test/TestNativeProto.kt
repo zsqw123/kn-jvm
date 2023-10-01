@@ -111,11 +111,14 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
     }
 
     private val getBytesPtr = jEnv.GetByteArrayElements!!
+    private val getBytesLengthPtr = jEnv.GetArrayLength!!
     private val releaseBytesPtr = jEnv.ReleaseByteArrayElements!!
-    override fun getBytes(jByteArray: jbyteArray): CArrayPointer<ByteVar> = memScoped {
+    override fun getBytes(jByteArray: jbyteArray): NativeProto.JBytes = memScoped {
         val jBoolean = alloc<jbooleanVar>()
         jBoolean.value = JNI_FALSE.toUByte()
-        getBytesPtr.invoke(envPtr, jByteArray, jBoolean.ptr)!!
+        val values = getBytesPtr.invoke(envPtr, jByteArray, jBoolean.ptr)!!
+        val length = getBytesLengthPtr.invoke(envPtr, jByteArray)
+        NativeProto.JBytes(values, length)
     }
 
     override fun releaseBytes(jByteArray: jobject, valuesPointer: CArrayPointer<ByteVar>) {

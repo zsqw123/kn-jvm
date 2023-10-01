@@ -37,7 +37,12 @@ interface NativeProto<O : CPointer<*>, V : CPointed, M : CPointer<*>> {
         methodName: String, methodDesc: MethodDesc
     ): M
 
-    fun getBytes(jByteArray: O): CArrayPointer<ByteVar>
+    class JBytes(
+        val valuesPointer: CArrayPointer<ByteVar>,
+        val length: Int,
+    )
+
+    fun getBytes(jByteArray: O): JBytes
 
     fun releaseBytes(jByteArray: O, valuesPointer: CArrayPointer<ByteVar>)
 }
