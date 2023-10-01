@@ -9,6 +9,7 @@ version = "unspecified"
 dependencies {
     implementation(D.ksp)
     implementation(D.poet)
+    implementation(project(":api"))
 }
 
 jvmTestDeps()

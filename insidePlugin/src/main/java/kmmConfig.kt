@@ -1,5 +1,4 @@
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.AbstractKotlinNativeTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -9,25 +8,20 @@ import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.target.presetName
 import java.io.File
 
-internal val Project.kme: KotlinMultiplatformExtension
-    get() = extensions.getByType(KotlinMultiplatformExtension::class.java)
-
 val Project.jniSourceRoot: File get() = File(buildDir, "generated/jniLibs")
 
 private val canRunJvmFamilies = arrayOf(
     Family.OSX, Family.MINGW, Family.LINUX,
     Family.ANDROID, // actually android also linux :)
 )
+
 private val canRunJvmPresets = KonanTarget.predefinedTargets.values.filter {
     it.family in canRunJvmFamilies
-}.toSet()
-
-private val deprecatedNativePresets = KonanTarget.deprecatedTargets
-    .map { it.presetName }.toSet()
+}
 
 private val allNeededNativePresetNames = canRunJvmPresets
-    .map { it.presetName }
-    .filterNot { it in deprecatedNativePresets }.toSet()
+    .filterNot { it in KonanTarget.deprecatedTargets }
+    .map { it.presetName }.toSet()
 
 val Project.neededNativePresets: Array<String>
     get() = kme.presets
@@ -40,11 +34,8 @@ val Project.allJvmPresets: Array<String>
         .filterIsInstance<KotlinJvmTargetPreset>()
         .mapArray { it.name }
 
-private inline fun <T, reified R> List<T>.mapArray(transform: (T) -> R): Array<R> {
-    return Array(size) { transform(get(it)) }
-}
-
 fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
+    val targets = targets
     val targetPresets = presets.matching { it.name in targetPlatforms }
     targetPresets.forEach {
         if (targets.findByName(it.name) == null) {

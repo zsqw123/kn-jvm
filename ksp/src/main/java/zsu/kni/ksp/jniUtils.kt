@@ -3,26 +3,18 @@
 package zsu.kni.ksp
 
 import com.google.devtools.ksp.KspExperimental
-import com.google.devtools.ksp.getClassDeclarationByName
-import com.google.devtools.ksp.processing.KSBuiltIns
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSName
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeArgument
+import zsu.kni.internal.JniTypeName
+import zsu.kni.internal.JvmBytecodeType
 
 fun Resolver.typeFromName(
     name: KSName, typeArguments: List<KSTypeArgument> = emptyList()
 ): KSType {
     return getClassDeclarationByName(name)!!.asType(typeArguments)
-}
-
-// eg: jint/jboolean...
-@JvmInline
-value class JniTypeName(val name: String) {
-    companion object {
-        val VOID = JniTypeName("void")
-    }
 }
 
 // eg: Java_com_foo_BarKt_something
@@ -62,8 +54,9 @@ private fun String.mangled(): String = buildString {
     }
 }
 
-fun KSType.getJniName(resolver: Resolver, mapJavaToKt: Boolean = true): JniTypeName? {
-    val buildInTypes = KtBuildInTypes.getInstance(resolver)
+fun KSType.getJniName(context: KniContext, mapJavaToKt: Boolean = true): JniTypeName? {
+    val buildInTypes = context.buildInTypes
+    val resolver = context.resolver
     if (this == buildInTypes.voidType) return JniTypeName.VOID
 
     // map java type to kotlin
@@ -72,21 +65,26 @@ fun KSType.getJniName(resolver: Resolver, mapJavaToKt: Boolean = true): JniTypeN
         val name = declaration.qualifiedName!!
         @OptIn(KspExperimental::class) val kotlinName = resolver.mapJavaNameToKotlin(name)!!
         val kotlinType = resolver.typeFromName(kotlinName)
-        return kotlinType.getJniName(resolver, false)
+        return kotlinType.getJniName(context, false)
     }
 
     val jniTypeNameText = with(buildInTypes) {
+        val basicType = when (this@getJniName) {
+            nothingType, unitType -> JvmBytecodeType.V
+            byteType -> JvmBytecodeType.B
+            shortType -> JvmBytecodeType.S
+            intType -> JvmBytecodeType.I
+            longType -> JvmBytecodeType.J
+            floatType -> JvmBytecodeType.F
+            doubleType -> JvmBytecodeType.D
+            charType -> JvmBytecodeType.C
+            booleanType -> JvmBytecodeType.Z
+            else -> null
+        }
+        if (basicType != null) return JniTypeName(basicType.jniName)
         when (this@getJniName) {
-            nothingType, unitType -> return JniTypeName.VOID
             stringType -> "jstring"
-            byteType -> "jbyte"
-            shortType -> "jshort"
-            intType -> "jint"
-            longType -> "jlong"
-            floatType -> "jfloat"
-            doubleType -> "jdouble"
-            charType -> "jchar"
-            booleanType -> "jboolean"
+
             // arrays
             byteArray -> "jbyteArray"
             charArray -> "jcharArray"
@@ -99,38 +97,11 @@ fun KSType.getJniName(resolver: Resolver, mapJavaToKt: Boolean = true): JniTypeN
             arrayType -> "jobjectArray"
 
             throwableType -> "jthrowable"
-            else -> "jobject"
+            else -> JvmBytecodeType.L.jniName
         }
     }
 
     return JniTypeName(jniTypeNameText)
 }
 
-class KtBuildInTypes(private val resolver: Resolver) : KSBuiltIns by resolver.builtIns {
-    val voidType = type<Void>()
-    val throwableType = type<Throwable>()
-
-    val byteArray = type<ByteArray>()
-    val charArray = type<CharArray>()
-    val shortArray = type<ShortArray>()
-    val intArray = type<IntArray>()
-    val longArray = type<LongArray>()
-    val floatArray = type<FloatArray>()
-    val doubleArray = type<DoubleArray>()
-    val booleanArray = type<BooleanArray>()
-
-    private inline fun <reified T> type(): KSType {
-        val requiredName = resolver.getClassDeclarationByName<T>()!!
-        return requiredName.asType(emptyList())
-    }
-
-    companion object {
-        private var buildInTypes: KtBuildInTypes? = null
-        fun getInstance(resolver: Resolver): KtBuildInTypes = buildInTypes ?: synchronized(this) {
-            KtBuildInTypes(resolver).also {
-                buildInTypes = it
-            }
-        }
-    }
-}
 
