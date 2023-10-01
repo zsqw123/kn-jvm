@@ -45,11 +45,11 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
         jObject: jobject,
         methodId: jmethodID,
         values: CArrayPointer<jvalue>,
-        type: JvmBytecodeType
+        returnType: JvmBytecodeType
     ): jvalue? {
         val nativeJValue = nativeHeap.alloc<jvalue>()
         with(nativeJValue) {
-            when (type) {
+            when (returnType) {
                 B -> b = callByte.invoke(envPtr, jObject, methodId, values)
                 C -> c = callChar.invoke(envPtr, jObject, methodId, values)
                 D -> d = callDouble.invoke(envPtr, jObject, methodId, values)
@@ -73,11 +73,11 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
         jClass: jclass,
         methodId: jmethodID,
         values: CArrayPointer<jvalue>,
-        type: JvmBytecodeType
+        returnType: JvmBytecodeType
     ): jvalue? {
         val nativeJValue = nativeHeap.alloc<jvalue>()
         with(nativeJValue) {
-            when (type) {
+            when (returnType) {
                 B -> b = callStaticByte.invoke(envPtr, jClass, methodId, values)
                 C -> c = callStaticChar.invoke(envPtr, jClass, methodId, values)
                 D -> d = callStaticDouble.invoke(envPtr, jClass, methodId, values)

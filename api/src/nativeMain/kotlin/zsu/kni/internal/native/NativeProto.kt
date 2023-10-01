@@ -20,7 +20,7 @@ interface NativeProto<O : CPointer<*>, V : CPointed, M : CPointer<*>> {
     fun callStatic(
         jClass: O, methodId: M,
         values: CArrayPointer<V>,
-        type: JvmBytecodeType,
+        returnType: JvmBytecodeType,
     ): V?
 
     /**
@@ -29,7 +29,7 @@ interface NativeProto<O : CPointer<*>, V : CPointed, M : CPointer<*>> {
     fun call(
         jObject: O, methodId: M,
         values: CArrayPointer<V>,
-        type: JvmBytecodeType,
+        returnType: JvmBytecodeType,
     ): V?
 
     fun getMethodId(
