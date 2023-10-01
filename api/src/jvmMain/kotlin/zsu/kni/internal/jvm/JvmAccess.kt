@@ -4,6 +4,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
 import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 /**
  * it will be called when access jvm from native

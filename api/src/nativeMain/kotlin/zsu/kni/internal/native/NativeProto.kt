@@ -13,7 +13,7 @@ import zsu.kni.internal.MethodDesc
  * @param V type of jvalue
  * @param M type of jmethodId
  */
-interface NativeProto<O : CPointer<*>, V : CPointed, M : CPointer<*>> {
+interface NativeProto<O : CPointer<*>, V : CVariable, M : CPointer<*>> {
     /**
      * @return returns null means no return value: [Unit]
      */
@@ -32,9 +32,13 @@ interface NativeProto<O : CPointer<*>, V : CPointed, M : CPointer<*>> {
         returnType: JvmBytecodeType,
     ): V?
 
+    fun getJClass(clazzName: BytecodeName): O
+
+    fun getObjClass(o: O): O // jobject -> jclass
+
     fun getMethodId(
-        clazzName: BytecodeName, isStatic: Boolean,
-        methodName: String, methodDesc: MethodDesc
+        jClass: O, isStatic: Boolean,
+        methodName: String, methodDesc: MethodDesc,
     ): M
 
     class JBytes(
@@ -45,4 +49,6 @@ interface NativeProto<O : CPointer<*>, V : CPointed, M : CPointer<*>> {
     fun getBytes(jByteArray: O): JBytes
 
     fun releaseBytes(jByteArray: O, valuesPointer: CArrayPointer<ByteVar>)
+
+    fun List<Pair<JvmBytecodeType, V>>.toArrayPtr(): CArrayPointer<V>
 }

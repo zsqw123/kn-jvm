@@ -97,11 +97,19 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
         return nativeJValue
     }
 
+    override fun getJClass(clazzName: BytecodeName): jobject = memScoped {
+        findClassPtr(envPtr, clazzName.cstr.ptr)!!
+    }
+
+    private val objClassCallPtr = jEnv.GetObjectClass!!
+    override fun getObjClass(o: jobject): jobject {
+        return objClassCallPtr.invoke(envPtr, o)!!
+    }
+
     override fun getMethodId(
-        clazzName: BytecodeName, isStatic: Boolean,
-        methodName: String, methodDesc: MethodDesc
+        jClass: jobject, isStatic: Boolean,
+        methodName: String, methodDesc: MethodDesc,
     ): jmethodID = memScoped {
-        val jClass = findClassPtr(envPtr, clazzName.cstr.ptr)
         val methodId = if (isStatic) findStaticMethodPtr(
             envPtr, jClass, methodName.cstr.ptr, methodDesc.cstr.ptr
         ) else findMethodPtr(
@@ -123,5 +131,25 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
 
     override fun releaseBytes(jByteArray: jobject, valuesPointer: CArrayPointer<ByteVar>) {
         releaseBytesPtr.invoke(envPtr, jByteArray, valuesPointer, JNI_ABORT)
+    }
+
+    override fun List<Pair<JvmBytecodeType, jvalue>>.toArrayPtr(): CArrayPointer<jvalue> {
+        val array = nativeHeap.allocArray<jvalue>(size)
+        for ((index, valuePair) in withIndex()) {
+            val (bytecodeType, value) = valuePair
+            when (bytecodeType) {
+                B -> array[index].b = value.b
+                C -> array[index].c = value.c
+                D -> array[index].d = value.d
+                F -> array[index].f = value.f
+                I -> array[index].i = value.i
+                J -> array[index].j = value.j
+                S -> array[index].s = value.s
+                Z -> array[index].z = value.z
+                L -> array[index].l = value.l
+                else -> throw IllegalArgumentException("cannot transform type of [${bytecodeType.jniName}], value: $value")
+            }
+        }
+        return array
     }
 }
