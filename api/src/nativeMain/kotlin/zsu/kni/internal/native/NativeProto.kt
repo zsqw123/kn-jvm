@@ -2,10 +2,7 @@
 
 package zsu.kni.internal.native
 
-import kotlinx.cinterop.CArrayPointer
-import kotlinx.cinterop.CPointed
-import kotlinx.cinterop.CPointer
-import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.*
 import zsu.kni.internal.BytecodeName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.internal.MethodDesc
@@ -18,7 +15,7 @@ import zsu.kni.internal.MethodDesc
  */
 interface NativeProto<O : CPointer<*>, V : CPointed, M : CPointer<*>> {
     /**
-     * @return returns null means no return value, such as: [Unit]
+     * @return returns null means no return value: [Unit]
      */
     fun callStatic(
         jClass: O, methodId: M,
@@ -26,6 +23,9 @@ interface NativeProto<O : CPointer<*>, V : CPointed, M : CPointer<*>> {
         type: JvmBytecodeType,
     ): V?
 
+    /**
+     * @return returns null means no return value: [Unit]
+     */
     fun call(
         jObject: O, methodId: M,
         values: CArrayPointer<V>,
@@ -36,4 +36,8 @@ interface NativeProto<O : CPointer<*>, V : CPointed, M : CPointer<*>> {
         clazzName: BytecodeName, isStatic: Boolean,
         methodName: String, methodDesc: MethodDesc
     ): M
+
+    fun getBytes(jByteArray: O): CArrayPointer<ByteVar>
+
+    fun releaseBytes(jByteArray: O, valuesPointer: CArrayPointer<ByteVar>)
 }

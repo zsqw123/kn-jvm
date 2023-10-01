@@ -1,5 +1,7 @@
 @file:OptIn(ExperimentalForeignApi::class)
 
+package zsu.kni.test
+
 import kotlinx.cinterop.*
 import zsu.jni.*
 import zsu.kni.internal.BytecodeName
@@ -106,5 +108,17 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
             envPtr, jClass, methodName.cstr.ptr, methodDesc.cstr.ptr
         )
         methodId!!
+    }
+
+    private val getBytesPtr = jEnv.GetByteArrayElements!!
+    private val releaseBytesPtr = jEnv.ReleaseByteArrayElements!!
+    override fun getBytes(jByteArray: jbyteArray): CArrayPointer<ByteVar> = memScoped {
+        val jBoolean = alloc<jbooleanVar>()
+        jBoolean.value = JNI_FALSE.toUByte()
+        getBytesPtr.invoke(envPtr, jByteArray, jBoolean.ptr)!!
+    }
+
+    override fun releaseBytes(jByteArray: jobject, valuesPointer: CArrayPointer<ByteVar>) {
+        releaseBytesPtr.invoke(envPtr, jByteArray, valuesPointer, JNI_ABORT)
     }
 }
