@@ -120,6 +120,7 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
 
     private val getBytesPtr = jEnv.GetByteArrayElements!!
     private val getBytesLengthPtr = jEnv.GetArrayLength!!
+    private val createBytesPtr = jEnv.NewByteArray!!
     private val releaseBytesPtr = jEnv.ReleaseByteArrayElements!!
     override fun getBytes(jByteArray: jbyteArray): NativeProto.JBytes = memScoped {
         val jBoolean = alloc<jbooleanVar>()
@@ -129,8 +130,21 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
         NativeProto.JBytes(values, length)
     }
 
-    override fun releaseBytes(jByteArray: jobject, valuesPointer: CArrayPointer<ByteVar>) {
-        releaseBytesPtr.invoke(envPtr, jByteArray, valuesPointer, JNI_ABORT)
+    override fun createJBytes(byteArray: ByteArray): jvalue {
+        val length = byteArray.size
+        val newArrayPtr = createBytesPtr.invoke(envPtr, length)!!
+        val valuesPointer = getBytes(newArrayPtr).valuesPointer
+        byteArray.forEachIndexed { index, byte ->
+            valuesPointer[index] = byte
+        }
+        releaseBytes(newArrayPtr, valuesPointer, true)
+        val jvalue = nativeHeap.alloc<jvalue>()
+        jvalue.l = newArrayPtr
+        return jvalue
+    }
+
+    override fun releaseBytes(jByteArray: jobject, valuesPointer: CArrayPointer<ByteVar>, saveChanges: Boolean) {
+        releaseBytesPtr.invoke(envPtr, jByteArray, valuesPointer, if (saveChanges) 0 else JNI_ABORT)
     }
 
     override fun List<Pair<JvmBytecodeType, jvalue>>.toArrayPtr(): CArrayPointer<jvalue> {
