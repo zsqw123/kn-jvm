@@ -84,7 +84,8 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
         cObject: T, type: KType, jvmGeneratorClass: BytecodeName, jvmGeneratorMethod: String,
     ): V {
         val bytes = ProtoBuf.encodeToByteArray(serializer(type), cObject)
-        val args = listOf(JvmBytecodeType.L to createJBytes(bytes))
+        val jBytes = createJBytes(bytes)
+        val args = listOf(JvmBytecodeType.L to jBytes)
         return callStatic(
             jvmGeneratorClass, jvmGeneratorMethod, GENERATOR_DESC,
             args, JvmBytecodeType.L

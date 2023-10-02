@@ -12,7 +12,10 @@ import zsu.kni.internal.native.NativeProto
 
 // just my test file :)
 @OptIn(ExperimentalForeignApi::class)
-class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<jobject, jvalue, jmethodID> {
+class TestNativeProto(
+    private val envPtr: CPointer<JNIEnvVar>,
+    private val memAllocator: NativeFreeablePlacement,
+) : NativeProto<jobject, jvalue, jmethodID> {
     private val jEnv = envPtr.pointed.pointed!!
     private val findClassPtr = jEnv.FindClass!!
     private val findMethodPtr = jEnv.GetMethodID!!
@@ -47,7 +50,7 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
         values: CArrayPointer<jvalue>,
         returnType: JvmBytecodeType
     ): jvalue? {
-        val nativeJValue = nativeHeap.alloc<jvalue>()
+        val nativeJValue = memAllocator.alloc<jvalue>()
         with(nativeJValue) {
             when (returnType) {
                 B -> b = callByte.invoke(envPtr, jObject, methodId, values)
@@ -60,7 +63,7 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
                 Z -> z = callBoolean.invoke(envPtr, jObject, methodId, values)
                 L -> l = callObject.invoke(envPtr, jObject, methodId, values)
                 V -> {
-                    nativeHeap.free(nativeJValue)
+                    memAllocator.free(nativeJValue)
                     callVoid.invoke(envPtr, jObject, methodId, values)
                     return null
                 }
@@ -75,7 +78,7 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
         values: CArrayPointer<jvalue>,
         returnType: JvmBytecodeType
     ): jvalue? {
-        val nativeJValue = nativeHeap.alloc<jvalue>()
+        val nativeJValue = memAllocator.alloc<jvalue>()
         with(nativeJValue) {
             when (returnType) {
                 B -> b = callStaticByte.invoke(envPtr, jClass, methodId, values)
@@ -88,7 +91,7 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
                 Z -> z = callStaticBoolean.invoke(envPtr, jClass, methodId, values)
                 L -> l = callStaticObject.invoke(envPtr, jClass, methodId, values)
                 V -> {
-                    nativeHeap.free(nativeJValue)
+                    memAllocator.free(nativeJValue)
                     callStaticVoid.invoke(envPtr, jClass, methodId, values)
                     return null
                 }
@@ -138,7 +141,7 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
             valuesPointer[index] = byte
         }
         releaseBytes(newArrayPtr, valuesPointer, true)
-        val jvalue = nativeHeap.alloc<jvalue>()
+        val jvalue = memAllocator.alloc<jvalue>()
         jvalue.l = newArrayPtr
         return jvalue
     }
@@ -148,7 +151,7 @@ class TestNativeProto(private val envPtr: CPointer<JNIEnvVar>) : NativeProto<job
     }
 
     override fun List<Pair<JvmBytecodeType, jvalue>>.toArrayPtr(): CArrayPointer<jvalue> {
-        val array = nativeHeap.allocArray<jvalue>(size)
+        val array = memAllocator.allocArray<jvalue>(size)
         for ((index, valuePair) in withIndex()) {
             val (bytecodeType, value) = valuePair
             when (bytecodeType) {
