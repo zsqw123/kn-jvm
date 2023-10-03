@@ -18,8 +18,8 @@ object JvmAccess {
     }
 
     @JvmStatic
-    fun deserializeObject(byteArray: ByteArray, kType: KType): Any? {
+    fun deserializeObject(byteArray: ByteArray, kType: KType): Any {
         val serializer = serializer(kType)
-        return ProtoBuf.decodeFromByteArray(serializer, byteArray)
+        return ProtoBuf.decodeFromByteArray(serializer, byteArray)!!
     }
 }

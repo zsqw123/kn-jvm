@@ -21,7 +21,8 @@ fun Resolver.typeFromName(
 @JvmInline
 value class JniFuncName(val name: String)
 
-fun KSFunctionDeclaration.getJniName(resolver: Resolver): JniFuncName = buildString {
+fun KSFunctionDeclaration.getJniName(context: KniContext): JniFuncName = buildString {
+    val resolver = context.resolver
     val packageName = packageName.asString().replace('.', '/')
     append("Java_")
     append(packageName.mangled())
