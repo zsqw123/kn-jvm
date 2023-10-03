@@ -13,9 +13,11 @@ class NativeCImplFunctionGen(
     private val context: KniContext
 ) {
     private val env = context.envContext
+    private val nativeNames = env.nativeNames
+
     private fun singleFunction(function: KSFunctionDeclaration): FunSpec {
         val jniName = function.getJniName(context)
-        val nativeNames = env.nativeNames
+
         val cNameSpec = AnnotationSpec.builder(cNameClassName)
             .addMember("externName = %S", jniName.fullName).build()
         val parameterContainer = function.parameterSpecs(context)
@@ -89,18 +91,21 @@ class NativeCImplFunctionGen(
     ) {
         val returnType = function.returnType!!.resolve()
         val returnTypeName = returnType.toClassName()
-        val returnJniName = returnType.getJniName(context).jniName
+        val returnJniName = returnType.getJniName(context)
+        val returnJniNameName = returnJniName.jniName
+        val returnJniClassName = nativeNames.jni(returnJniName)
+        returns(returnJniClassName)
         // built in types
-        if (returnJniName in directMappingJniNames) {
+        if (returnJniNameName in directMappingJniNames) {
             addStatement("return $NAME_RETURNED")
             return
         }
-        if (returnJniName == B.jniName) {
+        if (returnJniNameName == B.jniName) {
             // boolean is UByte in KN
             addStatement("return if ($NAME_RETURNED) 1.toUByte() else 0.toUByte()")
             return
         }
-        if (returnJniName == C.jniName) {
+        if (returnJniNameName == C.jniName) {
             // char is UShort in KN
             addStatement("return $NAME_RETURNED.code.toUShort()")
             return
@@ -150,20 +155,24 @@ class NativeCImplFunctionGen(
 
     private fun generateFile(filePackage: String, functions: List<KSFunctionDeclaration>): FileSpec {
         val fileBuilder = FileSpec.builder(filePackage, C_IMPL)
+            .addAnnotation(optInForeignApiAnnotation)
         for (function in functions) {
             fileBuilder.addFunction(singleFunction(function))
         }
         return fileBuilder.build()
     }
 
-    fun generate(allImplFunc: Sequence<KSFunctionDeclaration>) {
+    /** @return success generated */
+    fun generate(allImplFunc: Sequence<KSFunctionDeclaration>): Boolean {
         val functionsByPackage: Map<String, List<KSFunctionDeclaration>> =
             allImplFunc.groupBy { it.packageName.asString() }
+        if (functionsByPackage.isEmpty()) return false
         functionsByPackage.forEach { (packageName, functions) ->
             generateFile(packageName, functions).writeTo(
                 context.envContext.codeGenerator, Dependencies.ALL_FILES
             )
         }
+        return true
     }
 }
 
@@ -179,3 +188,10 @@ private val directMappingJniNames = setOf(
     J.jniName,
     S.jniName,
 )
+
+private val optInForeignApiAnnotation = AnnotationSpec.builder(
+    ClassName("kotlin", "OptIn")
+).addMember(
+    "%T::class",
+    ClassName("kotlinx.cinterop", "ExperimentalForeignApi")
+).build()

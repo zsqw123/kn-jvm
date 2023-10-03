@@ -7,6 +7,7 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.ksp.toClassName
 import zsu.kni.internal.JniTypeName
 import zsu.kni.internal.JvmBytecodeType
@@ -117,10 +118,12 @@ fun String.mangled(): String = buildString {
     }
 }
 
+private val voidClassName = Void::class.asClassName()
 fun KSType.getJniName(context: KniContext, mapJavaToKt: Boolean = true): JniTypeName {
     val buildInTypes = context.buildInTypes
     val resolver = context.resolver
-    if (this == buildInTypes.voidType) return JniTypeName.VOID
+    val className = this.toClassName()
+    if (className == voidClassName) return JniTypeName.VOID
 
     // map java type to kotlin
     val declaration = declaration

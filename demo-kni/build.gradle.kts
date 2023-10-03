@@ -49,7 +49,14 @@ dependencies {
     kspMingwX64(":ksp")
 }
 
+addsKspDependsOn("jvm", "mingwX64")
+
 commonMainDependencies {
     implementation(D.pb)
     implementation(project(":api"))
 }
+
+ksp {
+    arg("kni-jni-package", "zsu.jni")
+}
+

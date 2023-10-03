@@ -1,6 +1,6 @@
 package zsu.native.demo
 
-import native.nativePlus
+import sample.nativePlus
 
 @Suppress("UnsafeDynamicallyLoadedCode")
 fun main() {

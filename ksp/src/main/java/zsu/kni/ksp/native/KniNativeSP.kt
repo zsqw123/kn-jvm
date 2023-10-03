@@ -14,12 +14,12 @@ class KniNativeSP(private val env: KniEnvContext) : SymbolProcessor {
     private val nativeProtoDependencies = Dependencies(false) // shouldn't change
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        createNativeProtoFile()
         val context = KniContext(env, resolver)
         val allJniImplFunc: Sequence<KSFunctionDeclaration> = resolver
             .getSymbolsWithAnnotation(jniImplFqn)
             .map { it as KSFunctionDeclaration }
-        NativeCImplFunctionGen(context).generate(allJniImplFunc)
+        val generated = NativeCImplFunctionGen(context).generate(allJniImplFunc)
+        if (generated) createNativeProtoFile()
         return emptyList()
     }
 

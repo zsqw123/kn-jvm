@@ -175,7 +175,7 @@ class $protoName(
                 S -> array[index].s = value.s
                 Z -> array[index].z = value.z
                 L -> array[index].l = value.l
-                else -> throw IllegalArgumentException("cannot transform type of [\$\{bytecodeType.jniName}], value: \$\{value}")
+                else -> throw IllegalArgumentException("cannot transform type of [${"$"}{bytecodeType.jniName}], value: ${"$"}value")
             }
         }
         return array

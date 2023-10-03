@@ -14,6 +14,7 @@ class KniJvmSP(private val env: KniEnvContext) : SymbolProcessor {
         val allJniApiFunc = resolver
             .getSymbolsWithAnnotation(jniApiFqn)
             .map { it as KSFunctionDeclaration }.toList()
+        if (allJniApiFunc.isEmpty()) return emptyList()
         SerializerClassGen(context).generate(allJniApiFunc)
         return emptyList()
     }

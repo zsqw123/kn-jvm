@@ -6,7 +6,6 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSType
 
 class KtBuildInTypes(private val resolver: Resolver) : KSBuiltIns by resolver.builtIns {
-    val voidType = type<Void>()
     val throwableType = type<Throwable>()
 
     val byteArray = type<ByteArray>()

@@ -65,3 +65,24 @@ fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
         }
     }
 }
+
+fun Project.addsKspDependsOn(vararg targetPlatforms: String) = kme.apply {
+    afterEvaluate {
+        val allKotlinSourceSet = sourceSets
+        val (allGenerated, allNotGenerated) = allKotlinSourceSet.partition {
+            it.name.contains("generatedBy", true)
+        }
+        for (targetPlatform in targetPlatforms) {
+            val kspSourceSet = allGenerated.firstOrNull {
+                it.name.contains(targetPlatform, true)
+            }
+            val mainSourceSetName = "${targetPlatform}Main"
+            val mainSourceSet = allNotGenerated.firstOrNull {
+                mainSourceSetName == it.name
+            }
+            if (kspSourceSet != null && mainSourceSet != null) {
+                kspSourceSet.dependsOn(mainSourceSet)
+            }
+        }
+    }
+}
