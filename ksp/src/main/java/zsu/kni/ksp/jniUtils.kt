@@ -55,7 +55,7 @@ fun String.mangled(): String = buildString {
     }
 }
 
-fun KSType.getJniName(context: KniContext, mapJavaToKt: Boolean = true): JniTypeName? {
+fun KSType.getJniName(context: KniContext, mapJavaToKt: Boolean = true): JniTypeName {
     val buildInTypes = context.buildInTypes
     val resolver = context.resolver
     if (this == buildInTypes.voidType) return JniTypeName.VOID
@@ -105,4 +105,11 @@ fun KSType.getJniName(context: KniContext, mapJavaToKt: Boolean = true): JniType
     return JniTypeName(jniTypeNameText)
 }
 
+private val buildInSerializerTypes = JvmBytecodeType.entries.filter {
+    it != JvmBytecodeType.V && it != JvmBytecodeType.L
+}.map { it.jniName }
 
+fun KSType.isCustomSerializerNeeded(context: KniContext): Boolean {
+    val jniName = getJniName(context).jniName
+    return jniName !in buildInSerializerTypes
+}

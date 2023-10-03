@@ -10,10 +10,11 @@ import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import zsu.kni.internal.jvm.JvmAccess
 import zsu.kni.ksp.KniContext
+import zsu.kni.ksp.isCustomSerializerNeeded
 import zsu.kni.ksp.mangled
 
 class SerializerClassGenerator(
-    context: KniContext,
+    private val context: KniContext,
 ) {
     private val env = context.envContext
 
@@ -53,17 +54,19 @@ class SerializerClassGenerator(
     }
 
     private fun generateAllCustomTypes(allAnnotatedFunc: List<KSFunctionDeclaration>) {
-        val allTypes = ArrayList<KSType>().apply {
+        val allTypes: Sequence<KSType> = sequence {
             allAnnotatedFunc.forEach {
                 val parentClass = it.parentDeclaration as KSClassDeclaration?
                 if (parentClass != null) {
-                    add(parentClass.asStarProjectedType())
+                    yield(parentClass.asStarProjectedType())
                 }
-                add(it.returnType!!.resolve())
-                addAll(it.parameters.map { param -> param.type.resolve() })
+                yield(it.returnType!!.resolve())
+                yieldAll(it.parameters.map { param -> param.type.resolve() })
             }
         }
-        val allClassNames = allTypes.map { it.toClassName() }
+        val allClassNames = allTypes
+            .filter { it.isCustomSerializerNeeded(context) }
+            .map { it.toClassName() }
         allClassNames.forEach {
             getSerializeFun(it)
             getDeserializeFun(it)
