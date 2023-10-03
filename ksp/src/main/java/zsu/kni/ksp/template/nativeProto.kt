@@ -1,18 +1,25 @@
+package zsu.kni.ksp.template
+
+fun getNativeProtoImpl(
+    packageName: String,
+    protoName: String,
+    jniPackageName: String
+): String = kt(
+    """
 @file:OptIn(ExperimentalForeignApi::class)
 
-package zsu.kni.test
+package $packageName
 
 import kotlinx.cinterop.*
-import zsu.jni.*
+import $jniPackageName.*
 import zsu.kni.internal.BytecodeName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.internal.JvmBytecodeType.*
 import zsu.kni.internal.MethodDesc
 import zsu.kni.internal.native.NativeProto
 
-// just my test file :)
 @OptIn(ExperimentalForeignApi::class)
-class TestNativeProto(
+class $protoName(
     private val envPtr: CPointer<JNIEnvVar>,
     private val memAllocator: NativeFreeablePlacement,
 ) : NativeProto<jobject, jvalue, jmethodID> {
@@ -109,12 +116,6 @@ class TestNativeProto(
         return objClassCallPtr.invoke(envPtr, o)!!
     }
 
-    override val jvalue.obtainO: jobject
-        get() = l!!
-
-    override val jobject.obtainV: jvalue
-        get() = memAllocator.alloc<jvalue>().also { it.l = this }
-
     override fun getMethodId(
         jClass: jobject, isStatic: Boolean,
         methodName: String, methodDesc: MethodDesc,
@@ -170,9 +171,11 @@ class TestNativeProto(
                 S -> array[index].s = value.s
                 Z -> array[index].z = value.z
                 L -> array[index].l = value.l
-                else -> throw IllegalArgumentException("cannot transform type of [${bytecodeType.jniName}], value: $value")
+                else -> throw IllegalArgumentException("cannot transform type of [\$\{bytecodeType.jniName}], value: \$\{value}")
             }
         }
         return array
     }
 }
+"""
+)

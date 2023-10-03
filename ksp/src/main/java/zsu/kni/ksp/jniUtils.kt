@@ -40,7 +40,7 @@ fun KSFunctionDeclaration.getJniName(resolver: Resolver): JniFuncName = buildStr
 /**
  * [JNI Design Spec](https://docs.oracle.com/en/java/javase/17/docs/specs/jni/design.html#resolving-native-method-names)
  */
-private fun String.mangled(): String = buildString {
+fun String.mangled(): String = buildString {
     for (c in this@mangled) when (c) {
         '/' -> append("_")
         '_' -> append("_1")

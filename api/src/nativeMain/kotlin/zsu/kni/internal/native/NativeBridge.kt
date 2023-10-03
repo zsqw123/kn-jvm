@@ -11,6 +11,7 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
 import zsu.kni.internal.BytecodeName
 import zsu.kni.internal.JvmBytecodeType
+import zsu.kni.internal.KspConst
 import zsu.kni.internal.MethodDesc
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -44,19 +45,25 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
     }
 
     /**
-     * @param jByteArrayInput jByteArray
+     * @param jObj java object
      * @return native object
      */
-    inline fun <reified T> j2cType(jByteArrayInput: O): T {
-        return j2cType(jByteArrayInput, typeOf<T>())
+    inline fun <reified T> j2cType(jObj: O, jvmGeneratorMethod: String): T {
+        return j2cType(jObj, jvmGeneratorMethod, typeOf<T>())
     }
 
     @PublishedApi
     @OptIn(ExperimentalSerializationApi::class)
     internal fun <T> j2cType(
-        jByteArrayInput: O, type: KType,
+        jObj: O, jvmGeneratorMethod: String, type: KType
     ): T {
-        val (valuesPointer, length) = getBytes(jByteArrayInput)
+        val jArrayValue = callStatic(
+            KspConst.serializerClassName, jvmGeneratorMethod, S_GENERATOR_DESC,
+            listOf(JvmBytecodeType.L to jObj.obtainV),
+            JvmBytecodeType.L
+        )!!
+        val jArrayObj = jArrayValue.obtainO
+        val (valuesPointer, length) = getBytes(jArrayObj)
         try {
             val bytes = valuesPointer.readBytes(length)
 
@@ -64,7 +71,7 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
             val obj = ProtoBuf.decodeFromByteArray(serializer(type), bytes) as T
             return obj
         } finally {
-            releaseBytes(jByteArrayInput, valuesPointer, false)
+            releaseBytes(jArrayObj, valuesPointer, false)
         }
     }
 
@@ -73,25 +80,26 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
      * @return jobject
      */
     inline fun <reified T> c2jType(
-        cObject: T, jvmGeneratorClass: BytecodeName, jvmGeneratorMethod: String,
+        cObject: T, jvmGeneratorMethod: String,
     ): V {
-        return c2jType(cObject, typeOf<T>(), jvmGeneratorClass, jvmGeneratorMethod)
+        return c2jType(cObject, typeOf<T>(), jvmGeneratorMethod)
     }
 
     @PublishedApi
     @OptIn(ExperimentalSerializationApi::class)
     internal fun <T> c2jType(
-        cObject: T, type: KType, jvmGeneratorClass: BytecodeName, jvmGeneratorMethod: String,
+        cObject: T, type: KType, jvmGeneratorMethod: String,
     ): V {
         val bytes = ProtoBuf.encodeToByteArray(serializer(type), cObject)
         val jBytes = createJBytes(bytes)
         val args = listOf(JvmBytecodeType.L to jBytes)
         return callStatic(
-            jvmGeneratorClass, jvmGeneratorMethod, GENERATOR_DESC,
+            KspConst.serializerClassName, jvmGeneratorMethod, DS_GENERATOR_DESC,
             args, JvmBytecodeType.L
         )!! // non-null, because cObject must not be a void
     }
 }
 
-private const val GENERATOR_DESC: MethodDesc = "([B)Ljava/lang/Object;"
+private const val DS_GENERATOR_DESC: MethodDesc = "([B)Ljava/lang/Object;"
+private const val S_GENERATOR_DESC: MethodDesc = "(Ljava/lang/Object;)[B"
 

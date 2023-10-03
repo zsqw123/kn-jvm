@@ -2,6 +2,7 @@ package zsu.kni.ksp
 
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
+import zsu.kni.ksp.template.getNativeProtoImpl
 
 class KniSPP : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
@@ -17,19 +18,38 @@ class KniSPP : SymbolProcessorProvider {
 
 private class KniCommonSP(private val context: KniEnvContext) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        TODO("Not yet implemented")
+        return emptyList()
     }
 }
 
 private class KniNativeSP(private val context: KniEnvContext) : SymbolProcessor {
+    private val nativeProtoDependencies = Dependencies(false) // shouldn't change
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        TODO("Not yet implemented")
+        createNativeProtoFile()
+
+    }
+
+    private fun createNativeProtoFile() {
+        val protoFile = context.codeGenerator.createNewFile(
+            nativeProtoDependencies, context.generatedPackage, context.generatedProtoName
+        )
+        protoFile.bufferedWriter().use {
+            val implText = getNativeProtoImpl(
+                context.generatedPackage, context.generatedProtoName, context.jniPackage
+            )
+            it.write(implText)
+        }
     }
 }
 
 private class KniJvmSP(private val context: KniEnvContext) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        TODO("Not yet implemented")
+
+    }
+
+    fun createSerializers() {
+
     }
 }
 

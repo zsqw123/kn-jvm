@@ -7,6 +7,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 class KniEnvContext(env: SymbolProcessorEnvironment) : KSPLogger by env.logger {
     private val options = env.options
     val generatedPackage = env.options["kni-generated-package"] ?: "zsu.kni.generated"
+    val generatedProtoName = env.options["kni-generated-proto-name"] ?: "JniNativeProto"
 
     // for android, normally "platform.android"
     val jniPackage = env.options["kni-jni-package"] ?: throw IllegalArgumentException(

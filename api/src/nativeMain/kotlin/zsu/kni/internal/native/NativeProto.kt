@@ -36,6 +36,9 @@ interface NativeProto<O : CPointer<*>, V : CVariable, M : CPointer<*>> {
 
     fun getObjClass(o: O): O // jobject -> jclass
 
+    val V.obtainO: O
+    val O.obtainV: V
+
     fun getMethodId(
         jClass: O, isStatic: Boolean,
         methodName: String, methodDesc: MethodDesc,
