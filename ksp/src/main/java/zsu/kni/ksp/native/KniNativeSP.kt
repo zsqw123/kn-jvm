@@ -7,7 +7,6 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.KniEnvContext
-import zsu.kni.ksp.getJniName
 import zsu.kni.ksp.jniImplFqn
 import zsu.kni.ksp.template.getNativeProtoImpl
 
@@ -20,7 +19,7 @@ class KniNativeSP(private val env: KniEnvContext) : SymbolProcessor {
         val allJniImplFunc: Sequence<KSFunctionDeclaration> = resolver
             .getSymbolsWithAnnotation(jniImplFqn)
             .map { it as KSFunctionDeclaration }
-        val implFuncMap = allJniImplFunc.associateBy { it.getJniName(context) }
+        NativeCImplFunctionGen(context).generate(allJniImplFunc)
         return emptyList()
     }
 

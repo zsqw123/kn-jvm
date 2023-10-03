@@ -1,7 +1,6 @@
 package zsu.kni.ksp
 
 import com.google.devtools.ksp.processing.*
-import com.google.devtools.ksp.symbol.KSAnnotated
 import zsu.kni.ksp.jvm.KniJvmSP
 import zsu.kni.ksp.native.KniNativeSP
 
