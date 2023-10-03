@@ -21,7 +21,7 @@ import zsu.kni.internal.native.NativeProto
 @OptIn(ExperimentalForeignApi::class)
 class $protoName(
     private val envPtr: CPointer<JNIEnvVar>,
-    private val memAllocator: NativeFreeablePlacement,
+    private val memAllocator: NativePlacement,
 ) : NativeProto<jobject, jvalue, jmethodID> {
     private val jEnv = envPtr.pointed.pointed!!
     private val findClassPtr = jEnv.FindClass!!
@@ -70,7 +70,6 @@ class $protoName(
                 Z -> z = callBoolean.invoke(envPtr, jObject, methodId, values)
                 L -> l = callObject.invoke(envPtr, jObject, methodId, values)
                 V -> {
-                    memAllocator.free(nativeJValue)
                     callVoid.invoke(envPtr, jObject, methodId, values)
                     return null
                 }
@@ -98,7 +97,6 @@ class $protoName(
                 Z -> z = callStaticBoolean.invoke(envPtr, jClass, methodId, values)
                 L -> l = callStaticObject.invoke(envPtr, jClass, methodId, values)
                 V -> {
-                    memAllocator.free(nativeJValue)
                     callStaticVoid.invoke(envPtr, jClass, methodId, values)
                     return null
                 }
@@ -115,6 +113,12 @@ class $protoName(
     override fun getObjClass(o: jobject): jobject {
         return objClassCallPtr.invoke(envPtr, o)!!
     }
+
+    override val jvalue.obtainO: jobject
+        get() = l!!
+
+    override val jobject.obtainV: jvalue
+        get() = memAllocator.alloc<jvalue>().also { it.l = this }
 
     override fun getMethodId(
         jClass: jobject, isStatic: Boolean,

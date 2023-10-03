@@ -11,7 +11,6 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
 import zsu.kni.internal.BytecodeName
 import zsu.kni.internal.JvmBytecodeType
-import zsu.kni.internal.KspConst
 import zsu.kni.internal.MethodDesc
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -48,17 +47,19 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
      * @param jObj java object
      * @return native object
      */
-    inline fun <reified T> j2cType(jObj: O, jvmGeneratorMethod: String): T {
-        return j2cType(jObj, jvmGeneratorMethod, typeOf<T>())
+    inline fun <reified T> j2cType(
+        jObj: O, jvmSerializerClass: String, jvmSerializerMethod: String
+    ): T {
+        return j2cType(jObj, jvmSerializerClass, jvmSerializerMethod, typeOf<T>())
     }
 
     @PublishedApi
     @OptIn(ExperimentalSerializationApi::class)
     internal fun <T> j2cType(
-        jObj: O, jvmGeneratorMethod: String, type: KType
+        jObj: O, jvmSerializerClass: String, jvmGeneratorMethod: String, type: KType
     ): T {
         val jArrayValue = callStatic(
-            KspConst.serializerClassName, jvmGeneratorMethod, S_GENERATOR_DESC,
+            jvmSerializerClass, jvmGeneratorMethod, S_GENERATOR_DESC,
             listOf(JvmBytecodeType.L to jObj.obtainV),
             JvmBytecodeType.L
         )!!
@@ -80,21 +81,21 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
      * @return jobject
      */
     inline fun <reified T> c2jType(
-        cObject: T, jvmGeneratorMethod: String,
+        cObject: T, jvmSerializerClass: String, jvmSerializerMethod: String
     ): V {
-        return c2jType(cObject, typeOf<T>(), jvmGeneratorMethod)
+        return c2jType(cObject, jvmSerializerClass, jvmSerializerMethod, typeOf<T>())
     }
 
     @PublishedApi
     @OptIn(ExperimentalSerializationApi::class)
     internal fun <T> c2jType(
-        cObject: T, type: KType, jvmGeneratorMethod: String,
+        cObject: T, jvmSerializerClass: String, jvmSerializerMethod: String, type: KType,
     ): V {
         val bytes = ProtoBuf.encodeToByteArray(serializer(type), cObject)
         val jBytes = createJBytes(bytes)
         val args = listOf(JvmBytecodeType.L to jBytes)
         return callStatic(
-            KspConst.serializerClassName, jvmGeneratorMethod, DS_GENERATOR_DESC,
+            jvmSerializerClass, jvmSerializerMethod, DS_GENERATOR_DESC,
             args, JvmBytecodeType.L
         )!! // non-null, because cObject must not be a void
     }

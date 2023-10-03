@@ -26,9 +26,3 @@ enum class JvmBytecodeType(val jniName: String) {
 
 typealias BytecodeName = String
 typealias MethodDesc = String
-
-object KspConst {
-    const val serializerPackage = "zsu.kni.generated.serializer"
-    const val serializerName = "Serializer"
-    const val serializerClassName = "$serializerPackage.$serializerName"
-}

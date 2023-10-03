@@ -12,8 +12,9 @@ import zsu.kni.internal.jvm.JvmAccess
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.isCustomSerializerNeeded
 import zsu.kni.ksp.mangled
+import zsu.kni.ksp.serializerName
 
-class SerializerClassGenerator(
+class SerializerClassGen(
     private val context: KniContext,
 ) {
     private val env = context.envContext
@@ -28,7 +29,7 @@ class SerializerClassGenerator(
     private fun getDeserializeFun(className: ClassName): FunSpec {
         val fqName = className.canonicalName
         deserializedNames[fqName]?.let { return it }
-        val funBuilder = FunSpec.builder(fqName.replace('.', '/').mangled()).jvmStatic()
+        val funBuilder = FunSpec.builder(className.serializerName).jvmStatic()
             .addParameter("obj", Any::class)
             .addStatement("return·%M(obj, typeOf<%T>())", jvmDeserializeMemberName, className)
             .returns(ByteArray::class)
@@ -38,16 +39,15 @@ class SerializerClassGenerator(
     private fun getSerializeFun(className: ClassName): FunSpec {
         val fqName = className.canonicalName
         serializedNames[fqName]?.let { return it }
-        val funBuilder = FunSpec.builder(fqName.replace('.', '/').mangled()).jvmStatic()
+        val funBuilder = FunSpec.builder(className.serializerName).jvmStatic()
             .addParameter("array", ByteArray::class)
             .addStatement("return·%M(array, typeOf<%T>())", jvmSerializeMemberName, className)
             .returns(Any::class)
         return funBuilder.build().also { serializedNames[fqName] = it }
     }
 
-    private val generatedClassName = ClassName(env.generatedPackage, env.generatedProtoName)
     private fun getTypeSpec(): TypeSpec {
-        return TypeSpec.objectBuilder(generatedClassName)
+        return TypeSpec.objectBuilder(env.generatedSerializerClassName)
             .addFunctions(serializedNames.values)
             .addFunctions(deserializedNames.values)
             .build()
@@ -76,7 +76,7 @@ class SerializerClassGenerator(
     fun generate(allAnnotatedFunc: List<KSFunctionDeclaration>) {
         generateAllCustomTypes(allAnnotatedFunc)
         val typeSpec = getTypeSpec()
-        val fileSpec = FileSpec.builder(generatedClassName)
+        val fileSpec = FileSpec.builder(env.generatedSerializerClassName)
             .addType(typeSpec).build()
         fileSpec.writeTo(env.codeGenerator, Dependencies.ALL_FILES)
     }

@@ -14,7 +14,7 @@ import zsu.kni.internal.native.NativeProto
 @OptIn(ExperimentalForeignApi::class)
 class TestNativeProto(
     private val envPtr: CPointer<JNIEnvVar>,
-    private val memAllocator: NativeFreeablePlacement,
+    private val memAllocator: NativePlacement,
 ) : NativeProto<jobject, jvalue, jmethodID> {
     private val jEnv = envPtr.pointed.pointed!!
     private val findClassPtr = jEnv.FindClass!!
@@ -63,7 +63,6 @@ class TestNativeProto(
                 Z -> z = callBoolean.invoke(envPtr, jObject, methodId, values)
                 L -> l = callObject.invoke(envPtr, jObject, methodId, values)
                 V -> {
-                    memAllocator.free(nativeJValue)
                     callVoid.invoke(envPtr, jObject, methodId, values)
                     return null
                 }
@@ -91,7 +90,6 @@ class TestNativeProto(
                 Z -> z = callStaticBoolean.invoke(envPtr, jClass, methodId, values)
                 L -> l = callStaticObject.invoke(envPtr, jClass, methodId, values)
                 V -> {
-                    memAllocator.free(nativeJValue)
                     callStaticVoid.invoke(envPtr, jClass, methodId, values)
                     return null
                 }
@@ -175,4 +173,9 @@ class TestNativeProto(
         }
         return array
     }
+}
+
+fun main() {
+    val a: Char = 'a'
+    val ua = a.code.toUShort()
 }
