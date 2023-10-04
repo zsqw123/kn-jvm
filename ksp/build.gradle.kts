@@ -1,10 +1,8 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
+    id("insidePublish")
 }
-
-group = "org.example"
-version = "unspecified"
 
 dependencies {
     implementation(D.ksp)

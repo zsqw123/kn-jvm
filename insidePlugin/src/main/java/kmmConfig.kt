@@ -1,6 +1,5 @@
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.mpp.AbstractKotlinNativeTargetPreset
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 import org.jetbrains.kotlin.konan.target.Family
@@ -29,10 +28,7 @@ val Project.neededNativePresets: Array<String>
         .filter { it.name in allNeededNativePresetNames }
         .mapArray { it.name }
 
-val Project.allJvmPresets: Array<String>
-    get() = kme.presets
-        .filterIsInstance<KotlinJvmTargetPreset>()
-        .mapArray { it.name }
+val jvmPreset: String get() = "jvm"
 
 fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
     val targets = targets
@@ -45,20 +41,20 @@ fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
     sourceSets.apply {
         val commonMain = getByName("commonMain")
         val commonTest = getByName("commonTest") {
-            it.dependsOn(commonMain)
+            dependsOn(commonMain)
         }
         val nativeMain = create("nativeMain").apply {
             dependsOn(commonMain)
         }
         targets.withType(KotlinNativeTarget::class.java) {
-            it.compilations.apply {
+            compilations.apply {
                 getByName("main").defaultSourceSet.dependsOn(nativeMain)
                 getByName("test").defaultSourceSet.dependsOn(commonTest)
             }
         }
 
         targets.withType(KotlinJvmTarget::class.java) {
-            it.compilations.apply {
+            compilations.apply {
                 val resSourceSet = getByName("main").defaultSourceSet.resources
                 resSourceSet.srcDir(File(buildDir, "generated/jniLibs"))
             }

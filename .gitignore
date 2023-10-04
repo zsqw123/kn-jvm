@@ -39,3 +39,4 @@ bin/
 .DS_Store
 
 /local.properties
+/publish.properties

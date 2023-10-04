@@ -19,8 +19,10 @@ rootProject.name = "kn-jvm"
 includeBuild("insidePlugin")
 
 include(":app")
-include(":demo-dialog")
+
+// dialog just a sample, not actually used for kni project
+//include(":demo-dialog")
+
 include(":demo-kni")
-include(":android-demo")
 include(":ksp")
 include(":api")
