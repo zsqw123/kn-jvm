@@ -99,7 +99,7 @@ in these cases, `10 μs` may be acceptable.
     }
     
     dependencies {
-        val kniKspPath = "io.github.zsqw123:kni-ksp::<version>"
+        val kniKspPath = "io.github.zsqw123:kni-ksp:<version>"
         // your jvm platform target, here is a sample
         add("kspJvm", kniKspPath)
         // your native platform target, here is windows x64 sample
