@@ -58,7 +58,7 @@ fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
             val resSourceSet = compilations.getByName("main").defaultSourceSet.resources
             resSourceSet.srcDir(File(buildDir, "generated/jniLibs"))
             compilations.all {
-                kotlinOptions.jvmTarget = JvmTarget.JVM_11.target
+                kotlinOptions.jvmTarget = JvmTarget.JVM_1_8.target
             }
         }
     }
