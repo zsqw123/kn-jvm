@@ -132,7 +132,7 @@ plugin, but still can check the sample here: [demo-kni](demo-kni)
 
 ### (WIP) Tech Solution
 
-We use the Lark to write the technical solution, although it is currently only available in Chinese, but you
+We use the Lark to write the technical solution, although its language is Chinese, but you
 can choose to use Lark document translator
 
 [From KMM to Project Panama, or Higher](https://eqyrx3fg3l.feishu.cn/docx/K4WQdNDYso6sGTxPmM5c9KVCnYK)
