@@ -28,10 +28,12 @@ data class JniFuncName(
 @OptIn(KspExperimental::class)
 fun KSFunctionDeclaration.getJniName(context: KniContext): JniFuncName {
     val resolver = context.resolver
-    val packageName = packageName.asString().replace('.', '/').mangled()
-    val ownerClassName = resolver.getOwnerJvmClassName(this@getJniName)!!.mangled()
+    val packageName = packageName.asString()
+    val packageMangled = packageName.replace('.', '/').mangled()
+    val ownerClassFullName = resolver.getOwnerJvmClassName(this@getJniName)!!
+    val ownerClassName = ownerClassFullName.removePrefix("$packageName.").mangled()
     val methodName = resolver.getJvmName(this@getJniName)!!.mangled()
-    return JniFuncName(packageName, ownerClassName, methodName)
+    return JniFuncName(packageMangled, ownerClassName, methodName)
 }
 
 // List<originClassName to ParameterSpec>

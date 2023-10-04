@@ -4,7 +4,7 @@ package zsu.kni.test
 
 import kotlinx.cinterop.*
 import zsu.jni.*
-import zsu.kni.internal.BytecodeName
+import zsu.kni.internal.InternalName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.internal.JvmBytecodeType.*
 import zsu.kni.internal.MethodDesc
@@ -98,7 +98,7 @@ class TestNativeProto(
         return nativeJValue
     }
 
-    override fun getJClass(clazzName: BytecodeName): jobject = memScoped {
+    override fun getJClass(clazzName: InternalName): jobject = memScoped {
         findClassPtr(envPtr, clazzName.cstr.ptr)!!
     }
 

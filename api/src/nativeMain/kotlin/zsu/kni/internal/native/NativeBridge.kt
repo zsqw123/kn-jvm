@@ -9,7 +9,7 @@ import kotlinx.cinterop.readBytes
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
-import zsu.kni.internal.BytecodeName
+import zsu.kni.internal.InternalName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.internal.MethodDesc
 import kotlin.reflect.KType
@@ -23,7 +23,7 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
      * @return returns null means no return value: [Unit]
      */
     fun callStatic(
-        clazz: BytecodeName, methodName: String, methodDesc: MethodDesc,
+        clazz: InternalName, methodName: String, methodDesc: MethodDesc,
         args: List<Pair<JvmBytecodeType, V>>, returnType: JvmBytecodeType,
     ): V? {
         val jclass = getJClass(clazz)
@@ -59,7 +59,7 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
         jObj: O, jvmSerializerClass: String, jvmGeneratorMethod: String, type: KType
     ): T {
         val jArrayValue = callStatic(
-            jvmSerializerClass, jvmGeneratorMethod, S_GENERATOR_DESC,
+            jvmSerializerClass.internalName, jvmGeneratorMethod, S_GENERATOR_DESC,
             listOf(JvmBytecodeType.L to jObj.obtainV),
             JvmBytecodeType.L
         )!!
@@ -82,7 +82,7 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
      */
     inline fun <reified T> c2jType(
         cObject: T, jvmSerializerClass: String, jvmSerializerMethod: String
-    ): V {
+    ): O {
         return c2jType(cObject, jvmSerializerClass, jvmSerializerMethod, typeOf<T>())
     }
 
@@ -90,16 +90,18 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
     @OptIn(ExperimentalSerializationApi::class)
     internal fun <T> c2jType(
         cObject: T, jvmSerializerClass: String, jvmSerializerMethod: String, type: KType,
-    ): V {
+    ): O {
         val bytes = ProtoBuf.encodeToByteArray(serializer(type), cObject)
         val jBytes = createJBytes(bytes)
         val args = listOf(JvmBytecodeType.L to jBytes)
         return callStatic(
-            jvmSerializerClass, jvmSerializerMethod, DS_GENERATOR_DESC,
+            jvmSerializerClass.internalName, jvmSerializerMethod, DS_GENERATOR_DESC,
             args, JvmBytecodeType.L
-        )!! // non-null, because cObject must not be a void
+        )!!.obtainO // non-null, because cObject must not be a void
     }
 }
+
+private inline val String.internalName get() = replace('.', '/')
 
 private const val DS_GENERATOR_DESC: MethodDesc = "([B)Ljava/lang/Object;"
 private const val S_GENERATOR_DESC: MethodDesc = "(Ljava/lang/Object;)[B"

@@ -24,5 +24,6 @@ enum class JvmBytecodeType(val jniName: String) {
     V(JniTypeName.VOID.jniName), // void is special
 }
 
-typealias BytecodeName = String
+// java/lang/Object
+typealias InternalName = String
 typealias MethodDesc = String

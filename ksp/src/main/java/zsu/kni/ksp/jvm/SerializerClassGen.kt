@@ -11,7 +11,6 @@ import com.squareup.kotlinpoet.ksp.writeTo
 import zsu.kni.internal.jvm.JvmAccess
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.isCustomSerializerNeeded
-import zsu.kni.ksp.mangled
 import zsu.kni.ksp.serializerName
 
 class SerializerClassGen(
@@ -26,24 +25,24 @@ class SerializerClassGen(
     private val serializedNames = hashMapOf<String, FunSpec>()
     private val deserializedNames = hashMapOf<String, FunSpec>()
 
-    private fun getDeserializeFun(className: ClassName): FunSpec {
-        val fqName = className.canonicalName
-        deserializedNames[fqName]?.let { return it }
-        val funBuilder = FunSpec.builder(className.serializerName).jvmStatic()
-            .addParameter("obj", Any::class)
-            .addStatement("return·%M(obj, typeOf<%T>())", jvmDeserializeMemberName, className)
-            .returns(ByteArray::class)
-        return funBuilder.build().also { deserializedNames[fqName] = it }
-    }
-
     private fun getSerializeFun(className: ClassName): FunSpec {
         val fqName = className.canonicalName
         serializedNames[fqName]?.let { return it }
         val funBuilder = FunSpec.builder(className.serializerName).jvmStatic()
-            .addParameter("array", ByteArray::class)
-            .addStatement("return·%M(array, typeOf<%T>())", jvmSerializeMemberName, className)
-            .returns(Any::class)
+            .addParameter("obj", Any::class)
+            .addStatement("return·%M(obj, %M<%T>())", jvmSerializeMemberName, typeOfMember, className)
+            .returns(ByteArray::class)
         return funBuilder.build().also { serializedNames[fqName] = it }
+    }
+
+    private fun getDeserializeFun(className: ClassName): FunSpec {
+        val fqName = className.canonicalName
+        deserializedNames[fqName]?.let { return it }
+        val funBuilder = FunSpec.builder(className.serializerName).jvmStatic()
+            .addParameter("array", ByteArray::class)
+            .addStatement("return·%M(array, %M<%T>())", jvmDeserializeMemberName, typeOfMember, className)
+            .returns(Any::class)
+        return funBuilder.build().also { deserializedNames[fqName] = it }
     }
 
     private fun getTypeSpec(): TypeSpec {
@@ -81,3 +80,5 @@ class SerializerClassGen(
         fileSpec.writeTo(env.codeGenerator, Dependencies.ALL_FILES)
     }
 }
+
+private val typeOfMember = MemberName("kotlin.reflect", "typeOf")

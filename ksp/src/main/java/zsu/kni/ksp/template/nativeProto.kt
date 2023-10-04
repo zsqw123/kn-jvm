@@ -12,7 +12,7 @@ package $packageName
 
 import kotlinx.cinterop.*
 import $jniPackageName.*
-import zsu.kni.internal.BytecodeName
+import zsu.kni.internal.InternalName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.internal.JvmBytecodeType.*
 import zsu.kni.internal.MethodDesc
@@ -105,7 +105,7 @@ class $protoName(
         return nativeJValue
     }
 
-    override fun getJClass(clazzName: BytecodeName): jobject = memScoped {
+    override fun getJClass(clazzName: InternalName): jobject = memScoped {
         findClassPtr(envPtr, clazzName.cstr.ptr)!!
     }
 

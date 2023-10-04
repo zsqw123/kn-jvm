@@ -3,7 +3,7 @@
 package zsu.kni.internal.native
 
 import kotlinx.cinterop.*
-import zsu.kni.internal.BytecodeName
+import zsu.kni.internal.InternalName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.internal.MethodDesc
 
@@ -32,7 +32,7 @@ interface NativeProto<O : CPointer<*>, V : CVariable, M : CPointer<*>> {
         returnType: JvmBytecodeType,
     ): V?
 
-    fun getJClass(clazzName: BytecodeName): O
+    fun getJClass(clazzName: InternalName): O
 
     fun getObjClass(o: O): O // jobject -> jclass
 
