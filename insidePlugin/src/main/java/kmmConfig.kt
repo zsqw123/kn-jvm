@@ -1,4 +1,5 @@
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.AbstractKotlinNativeTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
@@ -54,9 +55,10 @@ fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
         }
 
         targets.withType(KotlinJvmTarget::class.java) {
-            compilations.apply {
-                val resSourceSet = getByName("main").defaultSourceSet.resources
-                resSourceSet.srcDir(File(buildDir, "generated/jniLibs"))
+            val resSourceSet = compilations.getByName("main").defaultSourceSet.resources
+            resSourceSet.srcDir(File(buildDir, "generated/jniLibs"))
+            compilations.all {
+                kotlinOptions.jvmTarget = JvmTarget.JVM_11.target
             }
         }
     }
