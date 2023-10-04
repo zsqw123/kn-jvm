@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.util.*
 
 plugins {
@@ -61,9 +62,16 @@ if (needPublish) publishing {
         }
     }
 
-    if (isJvmPublish) publications {
-        create<MavenPublication>("maven") {
-            from(components.getByName("java"))
+    if (isJvmPublish) {
+        val sourcesJar by tasks.registering(Jar::class) {
+            archiveClassifier.set("sources")
+            from(kotlinExtension.sourceSets.getByName("main").kotlin.srcDirs)
+        }
+        publications {
+            create<MavenPublication>("maven") {
+                from(components.getByName("java"))
+                artifact(sourcesJar)
+            }
         }
     }
 
