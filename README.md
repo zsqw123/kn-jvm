@@ -92,7 +92,7 @@ fun main() {
     ```
 
    | arg                           | required | defaultValue      | description                         |
-         |-------------------------------|:--------:|-------------------|-------------------------------------|
+   |-------------------------------|:--------:|-------------------|-------------------------------------|
    | kni-jni-package               |   yes    |                   |                                     |
    | kni-generated-package         |    no    | zsu.kni.generated | package name of generated code      |
    | kni-generated-proto-name      |    no    | JniNativeProto    | class name of generated proto class |
