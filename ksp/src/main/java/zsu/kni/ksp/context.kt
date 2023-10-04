@@ -11,10 +11,10 @@ class KniEnvContext(env: SymbolProcessorEnvironment) : KSPLogger by env.logger {
     private val options = env.options
     val generatedPackage = env.options["kni-generated-package"] ?: "zsu.kni.generated"
 
-    val generatedProtoName = env.options["kni-generated-proto-name"] ?: "JniNativeProto_generated"
+    val generatedProtoName = env.options["kni-generated-proto-name"] ?: "JniNativeProto"
     val protoClassName = ClassName(generatedPackage, generatedProtoName)
 
-    val serializerName = env.options["kni-generated-serializer-name"] ?: "Serializer_generated"
+    val serializerName = env.options["kni-generated-serializer-name"] ?: "Serializer"
     val serializerClassName = ClassName(generatedPackage, serializerName)
     val serializerInternalName: InternalName = serializerClassName.internalName
 

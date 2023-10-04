@@ -12,6 +12,13 @@ configKmmSourceSet("jvm", "mingwX64")
 val sharedLibraryName = "zsuDemo"
 
 kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(project(":api"))
+            }
+        }
+    }
     val jvmTarget = jvm {
         mainRun {
             mainClass = "zsu.native.demo.MainKt"

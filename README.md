@@ -57,6 +57,53 @@ fun main() {
 
 ### Performance
 
+### Gradle Setup
+
+1. apply [KSP](https://github.com/google/ksp) to your project:
+    ```kotlin
+    plugins {
+        kotlin("multiplatform")
+        kotlin("plugin.serialization") // for custom type supports
+        id("com.google.devtools.ksp")
+    }
+    ```
+2. apply `kni` ksp plugin to different target
+    ```kotlin
+    commonMain {
+        dependencies {
+            implementation("io.github.zsqw123.kni:api:<version>")
+        }
+    }
+    
+    dependencies {
+        val kniKspPath = "io.github.zsqw123.kni:ksp:<version>"
+        // your jvm platform target, here is a sample
+        add("kspJvm", kniKspPath)
+        // your native platform target, here is windows x64 sample
+        add("kspMingwX64", kniKspPath)
+    }
+    ```
+3. add configurations:
+    ```kotlin
+    ksp {
+        // config jni package, For Android platform, usually `platform.android`
+        arg("kni-jni-package", "zsu.jni")
+    }
+    ```
+
+   | arg                           | required | defaultValue      | description                         |
+         |-------------------------------|:--------:|-------------------|-------------------------------------|
+   | kni-jni-package               |   yes    |                   |                                     |
+   | kni-generated-package         |    no    | zsu.kni.generated | package name of generated code      |
+   | kni-generated-proto-name      |    no    | JniNativeProto    | class name of generated proto class |
+   | kni-generated-serializer-name |    no    | Serializer        | class name of generated serializer  |
+
+> or take a look at demo project here: [demo-kni](demo-kni)
+
+#### How to run Kotlin/Native codes from jvm?
+
+You need to load native libraries which produced by Kotlin/Native sourceSets manually, and it is not autoload by this
+plugin, but still can check the sample here: [demo-kni](demo-kni)
 
 ## Other
 
