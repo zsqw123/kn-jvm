@@ -94,12 +94,12 @@ in these cases, `10 μs` may be acceptable.
     ```kotlin
     commonMain {
         dependencies {
-            implementation("io.github.zsqw123.kni:api:<version>")
+            implementation("io.github.zsqw123:kni-api:<version>")
         }
     }
     
     dependencies {
-        val kniKspPath = "io.github.zsqw123.kni:ksp:<version>"
+        val kniKspPath = "io.github.zsqw123:kni-ksp::<version>"
         // your jvm platform target, here is a sample
         add("kspJvm", kniKspPath)
         // your native platform target, here is windows x64 sample
@@ -116,7 +116,7 @@ in these cases, `10 μs` may be acceptable.
 
    | arg                           | required | defaultValue      | description                         |
    |-------------------------------|:--------:|-------------------|-------------------------------------|
-   | kni-jni-package               |   yes    |                   |                                     |
+   | **kni-jni-package**           | **yes**  |                   |                                     |
    | kni-generated-package         |    no    | zsu.kni.generated | package name of generated code      |
    | kni-generated-proto-name      |    no    | JniNativeProto    | class name of generated proto class |
    | kni-generated-serializer-name |    no    | Serializer        | class name of generated serializer  |
@@ -133,6 +133,7 @@ plugin, but still can check the sample here: [demo-kni](demo-kni)
 ### Tasks
 
 - [x] Interact Native from JVM
+- [ ] More compile asserts to check invalid usages.
 - [ ] Customization serialization provider
 - [ ] Interact JVM from Native
 - [ ] Unit test fixup and performance improvement
