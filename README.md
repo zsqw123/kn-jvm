@@ -78,6 +78,10 @@ in these cases, `10 μs` may be acceptable.
 
 ### Gradle Setup
 
+[Maven Central: kni-api](https://central.sonatype.com/artifact/io.github.zsqw123/kni-api)
+
+![Maven Central](https://img.shields.io/maven-central/v/io.github.zsqw123/kni-api)
+
 1. apply [KSP](https://github.com/google/ksp) to your project:
     ```kotlin
     plugins {
