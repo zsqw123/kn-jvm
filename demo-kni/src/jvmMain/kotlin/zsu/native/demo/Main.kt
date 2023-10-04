@@ -15,9 +15,10 @@ private fun loadLib() {
 fun main() {
     loadLib()
     println(nativePlus(1, Foo("f")).v)
+    val sameFoo = Foo("f")
     val costs = measureTimeMillis {
         repeat(1_000_000) {
-            nativePlus(it % 113, Foo("f")).v
+            nativePlus(it % 113, sameFoo).v
         }
     }
     println(costs)
