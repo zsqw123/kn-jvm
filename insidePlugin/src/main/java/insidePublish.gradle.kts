@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.util.*
 
 plugins {
@@ -28,7 +30,11 @@ val javadocJar by tasks.registering(Jar::class) {
     archiveClassifier.set("javadoc")
 }
 
-publishing {
+val isMultiplatformPublish = extensions.findByType<KotlinMultiplatformExtension>() != null
+val isJvmPublish = extensions.findByType<KotlinJvmProjectExtension>() != null
+val needPublish = isMultiplatformPublish || isJvmPublish
+
+if (needPublish) publishing {
     // Configure maven central repository
     repositories {
         maven {
@@ -46,11 +52,18 @@ publishing {
             groupId = "io.github.zsqw123"
             version = kniVersion
             val artifactName = name
-            artifactId = if ("kotlinMultiplatform" == artifactName) {
+            artifactId = if (isJvmPublish || ("kotlinMultiplatform" == artifactName)) {
+                // for jvm and common dependencies, use id directly
                 mavenArtifactId
             } else {
                 "$mavenArtifactId-$artifactName"
             }
+        }
+    }
+
+    if (isJvmPublish) publications {
+        create<MavenPublication>("maven") {
+            from(components.getByName("java"))
         }
     }
 
@@ -86,7 +99,7 @@ publishing {
 }
 
 // Signing artifacts. `signing.*` extra properties values will be used
-signing {
+if (needPublish) signing {
     val signTasks = sign(publishing.publications)
     afterEvaluate {
         tasks.withType(AbstractPublishToMaven::class.java)
@@ -95,6 +108,4 @@ signing {
             }
     }
 }
-
-
 
