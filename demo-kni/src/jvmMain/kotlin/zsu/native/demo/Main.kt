@@ -2,6 +2,7 @@ package zsu.native.demo
 
 import sample.Foo
 import sample.nativePlus
+import kotlin.system.measureTimeMillis
 
 @Suppress("UnsafeDynamicallyLoadedCode")
 private fun loadLib() {
@@ -14,5 +15,11 @@ private fun loadLib() {
 fun main() {
     loadLib()
     println(nativePlus(1, Foo("f")).v)
+    val costs = measureTimeMillis {
+        repeat(1_000_000) {
+            nativePlus(it % 113, Foo("f")).v
+        }
+    }
+    println(costs)
 }
 
