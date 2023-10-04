@@ -57,6 +57,25 @@ fun main() {
 
 ### Performance
 
+I made some simple [performance testing](demo-benchmark/src/main/java/org/example/PerformanceTest.kt) based on my local machine:
+
+> Environment: single thread, Windows 11, 32G RAM, AMD Ryzen 9 7940HS, 4700 MHz (47 x 100)  
+> 
+> `ms/mop`: milliseconds per million calls  
+> `op/s`: operations per seconds
+
+|             | direct-call                       | simple-task                                                                                                         |
+|-------------|-----------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| operations  | 52.83 ms/mop (18,927,709.84 op/s) | 9607.47 ms/mop (104,085.72 op/s)                                                                                    |
+| description | kotlin function direct call       | a very simply implementation, contains 1 basic type and 2 custom types. <br/> Can be used to test interaction costs |
+
+According to the data of `direct-call` and `simple-task`, we can get the extra cost of frequent JNI calls, and
+serialization, and other operations is about 9.55 ms per thousand calls, which means that on average such a call may
+consume an extra `10 μs`.
+
+But usually we only transfer time-consuming operations to native, or call some native libs, 
+in these cases, `10 μs` may be acceptable.
+
 ### Gradle Setup
 
 1. apply [KSP](https://github.com/google/ksp) to your project:
