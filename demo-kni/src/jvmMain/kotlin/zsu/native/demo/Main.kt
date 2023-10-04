@@ -2,18 +2,29 @@ package zsu.native.demo
 
 import sample.Foo
 import sample.nativePlus
+import java.io.File
+import kotlin.io.path.createTempDirectory
 import kotlin.system.measureTimeMillis
 
 @Suppress("UnsafeDynamicallyLoadedCode")
-private fun loadLib() {
+fun loadDemoLib() {
     val obj = object : Any() {}
     val libRes = obj.javaClass.getResource("/zsuDemo.dll")
     checkNotNull(libRes)
-    System.load(libRes.path)
+    val d = createTempDirectory().toFile()
+    val tmpLib = File(d, "zsuDemo.dll")
+    if (tmpLib.exists()) tmpLib.delete()
+    tmpLib.createNewFile()
+    libRes.openStream().use { input ->
+        tmpLib.outputStream().use { output ->
+            input.copyTo(output)
+        }
+    }
+    System.load(tmpLib.absolutePath)
 }
 
 fun main() {
-    loadLib()
+    loadDemoLib()
     println(nativePlus(1, Foo("f")).v)
     val sameFoo = Foo("f")
     val costs = measureTimeMillis {

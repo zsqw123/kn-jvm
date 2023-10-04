@@ -23,6 +23,8 @@ include(":app")
 // dialog just a sample, not actually used for kni project
 //include(":demo-dialog")
 
-include(":demo-kni")
 include(":ksp")
 include(":api")
+
+include(":demo-kni")
+include(":demo-benchmark")

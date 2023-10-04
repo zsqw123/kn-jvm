@@ -10,9 +10,8 @@ dependencies {
     implementation(D.poetKsp)
     implementation(D.pb)
     implementation(project(":api"))
+    jvmTestDeps()
 }
-
-jvmTestDeps()
 
 tasks.test {
     useJUnitPlatform()

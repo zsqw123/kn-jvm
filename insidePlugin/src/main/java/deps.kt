@@ -9,13 +9,15 @@ object D {
     const val poet = "com.squareup:kotlinpoet:$poetVersion"
     const val poetKsp = "com.squareup:kotlinpoet-ksp:$poetVersion"
     const val pb = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.6.0"
+
+    const val junitBom = "org.junit:junit-bom:5.9.1"
+    const val junitJupiter = "org.junit.jupiter:junit-jupiter"
+    const val coroutine = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
 }
 
-fun Project.jvmTestDeps(configurationName: String = "testImplementation") {
-    dependencies.apply {
-        add(configurationName, platform("org.junit:junit-bom:5.9.1"))
-        add(configurationName, "org.junit.jupiter:junit-jupiter")
-    }
+fun DependencyHandler.jvmTestDeps(configurationName: String = "testImplementation") {
+    add(configurationName, platform(D.junitBom))
+    add(configurationName, D.junitJupiter)
 }
 
 fun DependencyHandler.kspCommon(dependencyPath: String) {

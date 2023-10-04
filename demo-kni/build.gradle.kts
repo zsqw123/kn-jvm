@@ -4,9 +4,6 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-group = "me.zsqw123"
-version = "1.0-SNAPSHOT"
-
 configKmmSourceSet("jvm", "mingwX64")
 
 val sharedLibraryName = "zsuDemo"
