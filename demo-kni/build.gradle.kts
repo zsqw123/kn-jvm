@@ -21,25 +21,9 @@ kotlin {
 
     mingwX64 {
         binaries.sharedLib(sharedLibraryName) {
-            linkTask.doLast {
-                copy {
-                    from(outputFile)
-                    into(jniSourceRoot)
-                }
-            }
-
-            jvmCompileTask.dependsOn(linkTask)
+            jvmCompileTask.dependsOn(addsNativeLibToJniSources(this))
         }
-        compilations["main"].cinterops.create("jni") {
-            val javaHome = File(System.getProperty("java.home"))
-            packageName = "zsu.jni"
-            includeDirs.allHeadersDirs += files(
-                File(javaHome, "include"),
-                File(javaHome, "include/darwin"),
-                File(javaHome, "include/linux"),
-                File(javaHome, "include/win32")
-            )
-        }
+        configJniInterop(this, "jni", "zsu.jni")
     }
 }
 
@@ -48,8 +32,6 @@ dependencies {
     kspJvm(":ksp")
     kspMingwX64(":ksp")
 }
-
-addsKspDependsOn("jvm", "mingwX64")
 
 commonMainDependencies {
     implementation(D.pb)
@@ -60,3 +42,4 @@ ksp {
     arg("kni-jni-package", "zsu.jni")
 }
 
+addsKspDependsOn("jvm", "mingwX64")
