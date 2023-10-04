@@ -130,6 +130,14 @@ plugin, but still can check the sample here: [demo-kni](demo-kni)
 
 ## Other
 
+### Tasks
+
+- [x] Interact Native from JVM
+- [ ] Customization serialization provider
+- [ ] Interact JVM from Native
+- [ ] Unit test fixup and performance improvement
+- [ ] Research [Project Panama](https://openjdk.org/projects/panama/)
+
 ### (WIP) Tech Solution
 
 We use the Lark to write the technical solution, although its language is Chinese, but you
