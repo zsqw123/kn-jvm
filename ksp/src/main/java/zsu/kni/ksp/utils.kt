@@ -21,3 +21,5 @@ fun KSFunctionDeclaration.isStatic(): Boolean {
 
 inline val ClassName.serializerName: String
     get() = canonicalName.replace('.', '/').mangled()
+
+inline val ClassName.internalName get() = canonicalName.replace('.', '/')

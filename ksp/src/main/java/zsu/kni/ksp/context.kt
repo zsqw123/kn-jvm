@@ -4,16 +4,20 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.squareup.kotlinpoet.ClassName
+import zsu.kni.internal.InternalName
 import zsu.kni.ksp.native.NativeNames
 
 class KniEnvContext(env: SymbolProcessorEnvironment) : KSPLogger by env.logger {
     private val options = env.options
     val generatedPackage = env.options["kni-generated-package"] ?: "zsu.kni.generated"
-    val generatedProtoName = env.options["kni-generated-proto-name"] ?: "JniNativeProto_generated"
-    val generatedSerializerName = env.options["kni-generated-serializer-name"] ?: "Serializer_generated"
 
-    val generatedProtoClassName = ClassName(generatedPackage, generatedProtoName)
-    val generatedSerializerClassName = ClassName(generatedPackage, generatedSerializerName)
+    val generatedProtoName = env.options["kni-generated-proto-name"] ?: "JniNativeProto_generated"
+    val protoClassName = ClassName(generatedPackage, generatedProtoName)
+
+    val serializerName = env.options["kni-generated-serializer-name"] ?: "Serializer_generated"
+    val serializerClassName = ClassName(generatedPackage, serializerName)
+    val serializerInternalName: InternalName = serializerClassName.internalName
+
 
     // for android, normally "platform.android"
     val jniPackage = env.options["kni-jni-package"] ?: throw IllegalArgumentException(

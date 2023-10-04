@@ -29,7 +29,7 @@ class NativeCImplFunctionGen(
             // build proto & bridge
             addVal(
                 "_proto", "%T(${parameterContainer.jEnvPart.name}, this)",
-                env.generatedProtoClassName
+                env.protoClassName
             )
             addVal(NAME_BRIDGE, "%T(_proto)", nativeNames.nativeBridge)
             // build params
@@ -112,7 +112,7 @@ class NativeCImplFunctionGen(
         }
         addStatement(
             "return $NAME_BRIDGE.c2jType<%T>($NAME_RETURNED, %S, %S)",
-            returnTypeName, env.generatedSerializerClassName, returnTypeName.serializerName,
+            returnTypeName, env.serializerInternalName, returnTypeName.serializerName,
         )
     }
 
@@ -143,7 +143,7 @@ class NativeCImplFunctionGen(
         }
         addVal(
             realName, "$NAME_BRIDGE.j2cType<%T>($paramName, %S, %S)",
-            originClassName, env.generatedSerializerClassName, originClassName.serializerName,
+            originClassName, env.serializerInternalName, originClassName.serializerName,
         )
     }
 

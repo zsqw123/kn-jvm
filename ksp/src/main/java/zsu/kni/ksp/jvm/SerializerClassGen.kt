@@ -46,7 +46,7 @@ class SerializerClassGen(
     }
 
     private fun getTypeSpec(): TypeSpec {
-        return TypeSpec.objectBuilder(env.generatedSerializerClassName)
+        return TypeSpec.objectBuilder(env.serializerClassName)
             .addFunctions(serializedNames.values)
             .addFunctions(deserializedNames.values)
             .build()
@@ -75,7 +75,7 @@ class SerializerClassGen(
     fun generate(allAnnotatedFunc: List<KSFunctionDeclaration>) {
         generateAllCustomTypes(allAnnotatedFunc)
         val typeSpec = getTypeSpec()
-        val fileSpec = FileSpec.builder(env.generatedSerializerClassName)
+        val fileSpec = FileSpec.builder(env.serializerClassName)
             .addType(typeSpec).build()
         fileSpec.writeTo(env.codeGenerator, Dependencies.ALL_FILES)
     }
