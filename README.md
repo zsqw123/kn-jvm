@@ -60,7 +60,7 @@ fun main() {
 
 ## Other
 
-### Tech Solution
+### (WIP) Tech Solution
 
 We use the Lark to write the technical solution, although it is currently only available in Chinese, but you
 can choose to use Lark document translator
