@@ -1,5 +1,7 @@
 # KN-JVM
 
+**Note: still in the experimental stage and is not stable for production, It may be changed at any time**
+
 ![preview](docs/sample.png)
 
 Auto JNI binding based on Kotlin Multiplatform. Just need simply declare functions in the common module, and the tool
