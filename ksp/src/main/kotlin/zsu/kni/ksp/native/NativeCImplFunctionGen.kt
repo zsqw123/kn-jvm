@@ -3,9 +3,11 @@ package zsu.kni.ksp.native
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
+import zsu.kni.internal.JniTypeName
 import zsu.kni.internal.JvmBytecodeType.*
 import zsu.kni.ksp.*
 
@@ -24,6 +26,13 @@ class NativeCImplFunctionGen(
         val funBuilder = FunSpec.builder("${jniName.ownerName}_${jniName.methodName}")
             .addParameters(parameterContainer.collectAllSpec())
             .addAnnotation(cNameSpec)
+
+        // get returns
+        val returnType = function.returnType!!.resolve()
+        val returnJniName = returnType.getJniName(context)
+        // no need returns for void type
+        val needReturns = returnJniName == JniTypeName.VOID
+
         funBuilder.apply {
             beginControlFlow("%M", nativeNames.memScoped)
             // build proto & bridge
@@ -37,7 +46,7 @@ class NativeCImplFunctionGen(
             // call native function call
             buildCall(function, parameterContainer)
             // return value
-            buildReturn(function)
+            if (needReturns) buildReturn(returnType, returnJniName)
             endControlFlow()
         }
 
@@ -87,11 +96,10 @@ class NativeCImplFunctionGen(
     }
 
     private fun FunSpec.Builder.buildReturn(
-        function: KSFunctionDeclaration,
+        returnType: KSType,
+        returnJniName: JniTypeName,
     ) {
-        val returnType = function.returnType!!.resolve()
         val returnTypeName = returnType.toClassName()
-        val returnJniName = returnType.getJniName(context)
         val returnJniNameName = returnJniName.jniName
         val returnJniClassName = nativeNames.jni(returnJniName)
         returns(returnJniClassName)
