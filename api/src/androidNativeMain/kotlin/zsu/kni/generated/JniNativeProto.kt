@@ -1,18 +1,15 @@
-@file:OptIn(ExperimentalForeignApi::class)
-
-package zsu.kni.test
+package zsu.kni.generated
 
 import kotlinx.cinterop.*
-import zsu.jni.*
+import platform.android.*
 import zsu.kni.internal.InternalName
 import zsu.kni.internal.JvmBytecodeType
-import zsu.kni.internal.JvmBytecodeType.*
 import zsu.kni.internal.MethodDesc
 import zsu.kni.internal.native.NativeProto
 
-// just my test file :)
+@Suppress("unused") // used for android native side stub impl
 @OptIn(ExperimentalForeignApi::class)
-class TestNativeProto(
+class JniNativeProto(
     private val envPtr: CPointer<JNIEnvVar>,
     private val memAllocator: NativePlacement,
 ) : NativeProto<jobject, jvalue, jmethodID> {
@@ -43,6 +40,7 @@ class TestNativeProto(
     private val callStaticObject = jEnv.CallStaticObjectMethodA!!
     private val callStaticVoid = jEnv.CallVoidMethodA!!
 
+
     override fun call(
         jObject: jobject,
         methodId: jmethodID,
@@ -52,16 +50,16 @@ class TestNativeProto(
         val nativeJValue = memAllocator.alloc<jvalue>()
         with(nativeJValue) {
             when (returnType) {
-                B -> b = callByte.invoke(envPtr, jObject, methodId, values)
-                C -> c = callChar.invoke(envPtr, jObject, methodId, values)
-                D -> d = callDouble.invoke(envPtr, jObject, methodId, values)
-                F -> f = callFloat.invoke(envPtr, jObject, methodId, values)
-                I -> i = callInt.invoke(envPtr, jObject, methodId, values)
-                J -> j = callLong.invoke(envPtr, jObject, methodId, values)
-                S -> s = callShort.invoke(envPtr, jObject, methodId, values)
-                Z -> z = callBoolean.invoke(envPtr, jObject, methodId, values)
-                L -> l = callObject.invoke(envPtr, jObject, methodId, values)
-                V -> {
+                JvmBytecodeType.B -> b = callByte.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.C -> c = callChar.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.D -> d = callDouble.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.F -> f = callFloat.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.I -> i = callInt.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.J -> j = callLong.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.S -> s = callShort.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.Z -> z = callBoolean.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.L -> l = callObject.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.V -> {
                     callVoid.invoke(envPtr, jObject, methodId, values)
                     return null
                 }
@@ -79,16 +77,16 @@ class TestNativeProto(
         val nativeJValue = memAllocator.alloc<jvalue>()
         with(nativeJValue) {
             when (returnType) {
-                B -> b = callStaticByte.invoke(envPtr, jClass, methodId, values)
-                C -> c = callStaticChar.invoke(envPtr, jClass, methodId, values)
-                D -> d = callStaticDouble.invoke(envPtr, jClass, methodId, values)
-                F -> f = callStaticFloat.invoke(envPtr, jClass, methodId, values)
-                I -> i = callStaticInt.invoke(envPtr, jClass, methodId, values)
-                J -> j = callStaticLong.invoke(envPtr, jClass, methodId, values)
-                S -> s = callStaticShort.invoke(envPtr, jClass, methodId, values)
-                Z -> z = callStaticBoolean.invoke(envPtr, jClass, methodId, values)
-                L -> l = callStaticObject.invoke(envPtr, jClass, methodId, values)
-                V -> {
+                JvmBytecodeType.B -> b = callStaticByte.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.C -> c = callStaticChar.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.D -> d = callStaticDouble.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.F -> f = callStaticFloat.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.I -> i = callStaticInt.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.J -> j = callStaticLong.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.S -> s = callStaticShort.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.Z -> z = callStaticBoolean.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.L -> l = callStaticObject.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.V -> {
                     callStaticVoid.invoke(envPtr, jClass, methodId, values)
                     return null
                 }
@@ -158,15 +156,15 @@ class TestNativeProto(
         for ((index, valuePair) in withIndex()) {
             val (bytecodeType, value) = valuePair
             when (bytecodeType) {
-                B -> array[index].b = value.b
-                C -> array[index].c = value.c
-                D -> array[index].d = value.d
-                F -> array[index].f = value.f
-                I -> array[index].i = value.i
-                J -> array[index].j = value.j
-                S -> array[index].s = value.s
-                Z -> array[index].z = value.z
-                L -> array[index].l = value.l
+                JvmBytecodeType.B -> array[index].b = value.b
+                JvmBytecodeType.C -> array[index].c = value.c
+                JvmBytecodeType.D -> array[index].d = value.d
+                JvmBytecodeType.F -> array[index].f = value.f
+                JvmBytecodeType.I -> array[index].i = value.i
+                JvmBytecodeType.J -> array[index].j = value.j
+                JvmBytecodeType.S -> array[index].s = value.s
+                JvmBytecodeType.Z -> array[index].z = value.z
+                JvmBytecodeType.L -> array[index].l = value.l
                 else -> throw IllegalArgumentException("cannot transform type of [${bytecodeType.jniName}], value: $value")
             }
         }

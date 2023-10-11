@@ -46,10 +46,10 @@ fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
         val commonTest = getByName("commonTest") {
             dependsOn(commonMain)
         }
-        val nativeMain = create("nativeMain").apply {
+        val nativeMain = create("nativeMain") {
             dependsOn(commonMain)
         }
-        val nativeTest = create("nativeTest").apply {
+        val nativeTest = create("nativeTest") {
             dependsOn(commonTest)
         }
 
@@ -57,10 +57,10 @@ fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
         var androidNativeTest: KotlinSourceSet? = null
         if (targets.any { it.isAndroidNativeTarget() }) {
             // contains android native target
-            androidNativeMain = create("androidNativeMain").apply {
+            androidNativeMain = create("androidNativeMain") {
                 dependsOn(nativeMain)
             }
-            androidNativeTest = create("androidNativeTest").apply {
+            androidNativeTest = create("androidNativeTest") {
                 dependsOn(nativeMain)
             }
         }

@@ -26,12 +26,17 @@ class KniNativeSP(private val env: KniEnvContext) : SymbolProcessor {
             .map { it as KSFunctionDeclaration }
         val hasGeneratedApi = NativeApiGen(context).generate(allJniApiFunc)
 
-        if (hasGeneratedImpl || hasGeneratedApi) createNativeProtoFile()
+        if (hasGeneratedImpl || hasGeneratedApi) createNativeProtoFile(context)
 
         return emptyList()
     }
 
-    private fun createNativeProtoFile() {
+    private fun createNativeProtoFile(context: KniContext) {
+        val existedProto = context.optClass(env.protoClassName)
+        if (existedProto != null) {
+            // for android platform, we have pre-built proto class.
+            return
+        }
         val protoFile = env.codeGenerator.createNewFile(
             nativeProtoDependencies, env.generatedPackage, env.generatedProtoName
         )
@@ -42,4 +47,10 @@ class KniNativeSP(private val env: KniEnvContext) : SymbolProcessor {
             it.write(implText)
         }
     }
+
+    private fun KniContext.containsNativeProto() {
+
+    }
+
+    private fun KniContext.contains
 }
