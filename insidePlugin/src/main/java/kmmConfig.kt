@@ -1,5 +1,7 @@
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.AbstractKotlinNativeTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
@@ -47,10 +49,27 @@ fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
         val nativeMain = create("nativeMain").apply {
             dependsOn(commonMain)
         }
+        val nativeTest = create("nativeTest").apply {
+            dependsOn(commonTest)
+        }
+
+        var androidNativeMain: KotlinSourceSet? = null
+        var androidNativeTest: KotlinSourceSet? = null
+        if (targets.any { it.isAndroidNativeTarget() }) {
+            // contains android native target
+            androidNativeMain = create("androidNativeMain").apply {
+                dependsOn(nativeMain)
+            }
+            androidNativeTest = create("androidNativeTest").apply {
+                dependsOn(nativeMain)
+            }
+        }
         targets.withType(KotlinNativeTarget::class.java) {
+            val dependTo = if (isAndroidNativeTarget()) androidNativeMain!! else nativeMain
+            val dependTestTo = if (isAndroidNativeTarget()) androidNativeTest!! else nativeTest
             compilations.apply {
-                getByName("main").defaultSourceSet.dependsOn(nativeMain)
-                getByName("test").defaultSourceSet.dependsOn(commonTest)
+                getByName("main").defaultSourceSet.dependsOn(dependTo)
+                getByName("test").defaultSourceSet.dependsOn(dependTestTo)
             }
         }
 
@@ -88,4 +107,9 @@ fun Project.addsKspDependsOn(vararg targetPlatforms: String) = kme.apply {
             }
         }
     }
+}
+
+private fun KotlinTarget.isAndroidNativeTarget(): Boolean {
+    if (this !is KotlinNativeTarget) return false
+    return konanTarget.family == Family.ANDROID
 }

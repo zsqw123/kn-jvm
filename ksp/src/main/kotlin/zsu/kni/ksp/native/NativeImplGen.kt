@@ -1,23 +1,26 @@
 package zsu.kni.ksp.native
 
-import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ksp.toClassName
-import com.squareup.kotlinpoet.ksp.writeTo
 import zsu.kni.internal.JniTypeName
 import zsu.kni.internal.JvmBytecodeType.*
 import zsu.kni.ksp.*
 
-class NativeCImplFunctionGen(
+class NativeImplGen(
     private val context: KniContext
-) {
+) : NativeGenByPackage(context) {
     private val env = context.envContext
     private val nativeNames = env.nativeNames
 
-    private fun singleFunction(function: KSFunctionDeclaration): FunSpec {
+    override val generatedFileName: String = C_IMPL
+
+    override fun singleFunction(function: KSFunctionDeclaration): FunSpec {
         val jniName = function.getJniName(context)
 
         val cNameSpec = AnnotationSpec.builder(cNameClassName)
@@ -160,31 +163,9 @@ class NativeCImplFunctionGen(
     ) {
         addStatement("val $paramName = $initializer", *args)
     }
-
-    private fun generateFile(filePackage: String, functions: List<KSFunctionDeclaration>): FileSpec {
-        val fileBuilder = FileSpec.builder(filePackage, C_IMPL)
-            .addAnnotation(optInForeignApiAnnotation)
-        for (function in functions) {
-            fileBuilder.addFunction(singleFunction(function))
-        }
-        return fileBuilder.build()
-    }
-
-    /** @return success generated */
-    fun generate(allImplFunc: Sequence<KSFunctionDeclaration>): Boolean {
-        val functionsByPackage: Map<String, List<KSFunctionDeclaration>> =
-            allImplFunc.groupBy { it.packageName.asString() }
-        if (functionsByPackage.isEmpty()) return false
-        functionsByPackage.forEach { (packageName, functions) ->
-            generateFile(packageName, functions).writeTo(
-                context.envContext.codeGenerator, Dependencies.ALL_FILES
-            )
-        }
-        return true
-    }
 }
 
-private const val C_IMPL = "_kni_gen"
+private const val C_IMPL = "_kni_impl"
 private const val NAME_RETURNED = "returned"
 private const val NAME_BRIDGE = "_bridge"
 
@@ -197,9 +178,3 @@ private val directMappingJniNames = setOf(
     S.jniName,
 )
 
-private val optInForeignApiAnnotation = AnnotationSpec.builder(
-    ClassName("kotlin", "OptIn")
-).addMember(
-    "%T::class",
-    ClassName("kotlinx.cinterop", "ExperimentalForeignApi")
-).build()

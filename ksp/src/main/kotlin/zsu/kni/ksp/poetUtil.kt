@@ -2,10 +2,7 @@ package zsu.kni.ksp
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.ParameterizedTypeName
-import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
 
 // copy from kotlin poet, it is internal in poet sadly :(
@@ -30,3 +27,10 @@ fun KSFunctionDeclaration.asMemberName(): MemberName {
         MemberName(parent.toClassName(), simpleName.asString())
     }
 }
+
+val optInForeignApiAnnotation = AnnotationSpec.builder(
+    ClassName("kotlin", "OptIn")
+).addMember(
+    "%T::class",
+    ClassName("kotlinx.cinterop", "ExperimentalForeignApi")
+).build()
