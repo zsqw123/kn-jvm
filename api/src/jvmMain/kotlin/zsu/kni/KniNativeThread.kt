@@ -1,24 +1,22 @@
 package zsu.kni
 
 object KniNativeThread {
-    fun attach() {
-        attachCurrentThread(Thread.currentThread().id)
-    }
+    /**
+     * @param id custom id for current thread
+     */
+    @JvmStatic
+    external fun attach(id: Int)
 
-    fun detach() {
-        detachCurrentThread(Thread.currentThread().id)
-    }
+    /**
+     * @param id Int
+     * @param sameJEnv Boolean, keep same jenv with attached. 0->false; other->true
+     */
+    @JvmStatic
+    external fun detach(id: Int, sameJEnv: Int)
 
-    fun detachAll() {
-        detachAllThread()
-    }
+    // detach without env check
+    fun detach(id: Int) = detach(id, 0)
 
     @JvmStatic
-    private external fun attachCurrentThread(threadId: Long)
-
-    @JvmStatic
-    private external fun detachCurrentThread(threadId: Long)
-
-    @JvmStatic
-    private external fun detachAllThread()
+    external fun detachAll()
 }

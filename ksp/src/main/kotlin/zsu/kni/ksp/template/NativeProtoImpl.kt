@@ -1,18 +1,23 @@
-@file:OptIn(ExperimentalForeignApi::class)
+package zsu.kni.ksp.template
 
-package zsu.kni.test
+import org.intellij.lang.annotations.Language
+
+object NativeProtoImpl : Template {
+    @Language("kotlin")
+    override fun create(packageName: String, simpleClassName: String, jniPackageName: String): String {
+        return """
+package $packageName
 
 import kotlinx.cinterop.*
-import zsu.jni.*
+import $jniPackageName.*
 import zsu.kni.internal.InternalName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.internal.JvmBytecodeType.*
 import zsu.kni.internal.MethodDesc
 import zsu.kni.internal.native.NativeProto
 
-// just my test file :)
 @OptIn(ExperimentalForeignApi::class)
-class TestNativeProto(
+class $simpleClassName(
     private val envPtr: CPointer<JNIEnvVar>,
     private val memAllocator: NativePlacement,
 ) : NativeProto<jobject, jvalue, jmethodID> {
@@ -42,6 +47,7 @@ class TestNativeProto(
     private val callStaticDouble = jEnv.CallStaticDoubleMethodA!!
     private val callStaticObject = jEnv.CallStaticObjectMethodA!!
     private val callStaticVoid = jEnv.CallVoidMethodA!!
+
 
     override fun call(
         jObject: jobject,
@@ -167,9 +173,12 @@ class TestNativeProto(
                 S -> array[index].s = value.s
                 Z -> array[index].z = value.z
                 L -> array[index].l = value.l
-                else -> throw IllegalArgumentException("cannot transform type of [${bytecodeType.jniName}], value: $value")
+                else -> throw IllegalArgumentException("cannot transform type of [${"$"}{bytecodeType.jniName}], value: ${"$"}value")
             }
         }
         return array
+    }
+}
+"""
     }
 }
