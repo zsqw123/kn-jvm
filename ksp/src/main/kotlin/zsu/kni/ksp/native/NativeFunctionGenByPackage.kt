@@ -8,7 +8,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.optInForeignApiAnnotation
 
-abstract class NativeGenByPackage(
+abstract class NativeFunctionGenByPackage(
     private val context: KniContext
 ) {
     abstract val generatedFileName: String

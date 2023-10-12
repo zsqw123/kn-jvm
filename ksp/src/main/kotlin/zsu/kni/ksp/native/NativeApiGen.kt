@@ -6,7 +6,7 @@ import zsu.kni.ksp.KniContext
 
 class NativeApiGen(
     private val context: KniContext
-) : NativeGenByPackage(context) {
+) : NativeFunctionGenByPackage(context) {
     override val generatedFileName: String = C_API
     override fun singleFunction(function: KSFunctionDeclaration): FunSpec {
         TODO("Not yet implemented")

@@ -14,7 +14,7 @@ import zsu.kni.ksp.*
 
 class NativeImplGen(
     private val context: KniContext
-) : NativeGenByPackage(context) {
+) : NativeFunctionGenByPackage(context) {
     private val env = context.envContext
     private val nativeNames = env.nativeNames
 
