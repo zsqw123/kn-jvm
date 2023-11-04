@@ -42,10 +42,9 @@ fun Project.configKmmSourceSet(vararg targetPlatforms: String) = kme.apply {
         }
     }
     sourceSets.apply {
+        androidNativeArm32()
         val commonMain = getByName("commonMain")
-        val commonTest = getByName("commonTest") {
-            dependsOn(commonMain)
-        }
+        val commonTest = getByName("commonTest")
         val nativeMain = create("nativeMain") {
             dependsOn(commonMain)
         }
