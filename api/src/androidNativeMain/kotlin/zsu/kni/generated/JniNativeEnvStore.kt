@@ -7,8 +7,9 @@ import platform.android.JNIEnvVar
 import platform.android.jclass
 import platform.android.jint
 import zsu.kni.internal.native.NativeEnvStore
+import kotlin.experimental.ExperimentalNativeApi
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, ExperimentalNativeApi::class)
 object JniNativeEnvStore {
     @CName(externName = "Java_zsu_kni_KniNativeThread_attach")
     fun attach(
