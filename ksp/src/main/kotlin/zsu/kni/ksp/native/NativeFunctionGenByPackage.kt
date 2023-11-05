@@ -6,18 +6,24 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ksp.writeTo
 import zsu.kni.ksp.KniContext
-import zsu.kni.ksp.optInForeignApiAnnotation
+import zsu.kni.ksp.optInExpNativeApiAnnotation
 
 abstract class NativeFunctionGenByPackage(
     private val context: KniContext
 ) {
+    val env = context.envContext
+    val nativeNames = env.nativeNames
     abstract val generatedFileName: String
 
+    /**
+     * @param function function declared in source code
+     * @return generated glue code for declared source function
+     */
     abstract fun singleFunction(function: KSFunctionDeclaration): FunSpec
 
     private fun generateFile(filePackage: String, functions: List<KSFunctionDeclaration>): FileSpec {
         val fileBuilder = FileSpec.builder(filePackage, generatedFileName)
-            .addAnnotation(optInForeignApiAnnotation)
+            .addAnnotation(optInExpNativeApiAnnotation)
         for (function in functions) {
             fileBuilder.addFunction(singleFunction(function))
         }
@@ -34,5 +40,11 @@ abstract class NativeFunctionGenByPackage(
             )
         }
         return true
+    }
+
+    inline fun FunSpec.Builder.memScoped(content: FunSpec.Builder.() -> Unit) {
+        beginControlFlow("%M", nativeNames.memScoped)
+        content()
+        endControlFlow()
     }
 }

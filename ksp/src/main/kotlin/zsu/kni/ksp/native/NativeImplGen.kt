@@ -15,9 +15,6 @@ import zsu.kni.ksp.*
 class NativeImplGen(
     private val context: KniContext
 ) : NativeFunctionGenByPackage(context) {
-    private val env = context.envContext
-    private val nativeNames = env.nativeNames
-
     override val generatedFileName: String = C_IMPL
 
     override fun singleFunction(function: KSFunctionDeclaration): FunSpec {
@@ -25,7 +22,7 @@ class NativeImplGen(
 
         val cNameSpec = AnnotationSpec.builder(cNameClassName)
             .addMember("externName = %S", jniName.fullName).build()
-        val parameterContainer = function.parameterSpecs(context)
+        val parameterContainer = ImplParameters.from(context, function)
         val funBuilder = FunSpec.builder("${jniName.ownerName}_${jniName.methodName}")
             .addParameters(parameterContainer.collectAllSpec())
             .addAnnotation(cNameSpec)
@@ -36,8 +33,7 @@ class NativeImplGen(
         // no need returns for void type
         val needReturns = returnJniName == JniTypeName.VOID
 
-        funBuilder.apply {
-            beginControlFlow("%M", nativeNames.memScoped)
+        funBuilder.memScoped {
             // build proto & bridge
             addVal(
                 "_proto", "%T(${parameterContainer.jEnvPart.name}, this)",
@@ -50,7 +46,6 @@ class NativeImplGen(
             buildCall(function, parameterContainer)
             // return value
             if (needReturns) buildReturn(returnType, returnJniName)
-            endControlFlow()
         }
 
         return funBuilder.build()
@@ -58,36 +53,36 @@ class NativeImplGen(
 
     private fun FunSpec.Builder.buildAllParams(
         function: KSFunctionDeclaration,
-        container: ParameterSpecContainer,
+        implParameters: ImplParameters,
     ) {
-        if (!container.isStaticCall) {
+        if (!implParameters.isStaticCall) {
             val thisClassName = (function.parentDeclaration as KSClassDeclaration).toClassName()
-            singleParam(thisClassName to container.thisPart)
+            singleParam(thisClassName to implParameters.thisPart)
         }
-        if (container.extensionPart != null && container.extensionClassName != null) {
-            singleParam(container.extensionClassName to container.extensionPart)
+        if (implParameters.extensionPart != null && implParameters.extensionClassName != null) {
+            singleParam(implParameters.extensionClassName to implParameters.extensionPart)
         }
-        container.params.forEach { singleParam(it) }
+        implParameters.params.forEach { singleParam(it) }
     }
 
     private fun FunSpec.Builder.buildCall(
         function: KSFunctionDeclaration,
-        container: ParameterSpecContainer,
+        implParameters: ImplParameters,
     ) {
         // normal call
-        var callCode = container.params.joinToString(
+        var callCode = implParameters.params.joinToString(
             separator = ", ", prefix = "%M(", postfix = ")",
         ) { "_${it.second.name}" }
 
-        if (container.extensionPart != null) {
+        if (implParameters.extensionPart != null) {
             // has extension
-            callCode = "_${container.extensionPart.name}.$callCode"
+            callCode = "_${implParameters.extensionPart.name}.$callCode"
         }
 
-        val isStatic = container.isStaticCall
+        val isStatic = implParameters.isStaticCall
         if (!isStatic) {
             // non-static, wrap this with {
-            beginControlFlow("with(_${container.thisPart.name})")
+            beginControlFlow("with(_${implParameters.thisPart.name})")
         }
 
         addVal(NAME_RETURNED, callCode, function.asMemberName())
@@ -156,12 +151,6 @@ class NativeImplGen(
             realName, "$NAME_BRIDGE.j2cType<%T>($paramName, %S, %S)",
             originClassName, env.serializerInternalName, originClassName.serializerName,
         )
-    }
-
-    private fun FunSpec.Builder.addVal(
-        paramName: String, initializer: String, vararg args: Any
-    ) {
-        addStatement("val $paramName = $initializer", *args)
     }
 }
 

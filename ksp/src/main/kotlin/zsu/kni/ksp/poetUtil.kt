@@ -28,9 +28,12 @@ fun KSFunctionDeclaration.asMemberName(): MemberName {
     }
 }
 
-val optInForeignApiAnnotation = AnnotationSpec.builder(
+val optInExpNativeApiAnnotation = AnnotationSpec.builder(
     ClassName("kotlin", "OptIn")
 ).addMember(
     "%T::class",
     ClassName("kotlinx.cinterop", "ExperimentalForeignApi")
+).addMember(
+    "%T::class",
+    ClassName("kotlin.experimental", "ExperimentalNativeApi")
 ).build()

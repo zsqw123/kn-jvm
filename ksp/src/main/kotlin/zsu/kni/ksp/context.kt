@@ -16,8 +16,10 @@ class KniEnvContext(env: SymbolProcessorEnvironment) : KSPLogger by env.logger {
     val protoName = options["kni-generated-proto-name"] ?: "JniNativeProto"
     val protoClassName = ClassName(generatedPackage, protoName)
 
-    val envStoreName = options["kni-generated-env-store-name"] ?: "JniNativeEnvStore"
-    val envStoreClassName = ClassName(generatedPackage, envStoreName)
+    val envStoreClassName = ClassName("zsu.kni.internal.native", "NativeEnvStore")
+
+    val jniEnvStoreName = options["kni-generated-env-store-name"] ?: "JniNativeEnvStore"
+    val jniEnvStoreClassName = ClassName(generatedPackage, jniEnvStoreName)
 
     val serializerName = options["kni-generated-serializer-name"] ?: "Serializer"
     val serializerClassName = ClassName(generatedPackage, serializerName)
@@ -39,6 +41,7 @@ class KniContext(
 ) : KSPLogger by envContext {
     val buildInTypes: KtBuildInTypes = KtBuildInTypes(resolver)
 
+    // get class from poet ClassName
     fun optClass(className: ClassName): KSClassDeclaration? {
         return resolver.getClassDeclarationByName(className.canonicalName)
     }

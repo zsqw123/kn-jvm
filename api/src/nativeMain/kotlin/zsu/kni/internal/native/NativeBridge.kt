@@ -15,6 +15,11 @@ import zsu.kni.internal.MethodDesc
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
+/**
+ * @param O : CPointer<*> jobject pointer
+ * @param V : CVariable jvalue
+ * @param M : CPointer<*> jmethodId
+ */
 @OptIn(ExperimentalForeignApi::class)
 class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
     proto: NativeProto<O, V, M>,

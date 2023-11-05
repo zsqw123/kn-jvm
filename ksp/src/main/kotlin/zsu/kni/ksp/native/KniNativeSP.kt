@@ -30,7 +30,7 @@ class KniNativeSP(private val env: KniEnvContext) : SymbolProcessor {
         val hasGeneratedApi = NativeApiGen(context).generate(allJniApiFunc)
 
         if (hasGeneratedImpl || hasGeneratedApi) {
-            context.createNativeTemplateFile(NativeEnvStoreImpl, env.envStoreClassName)
+            context.createNativeTemplateFile(NativeEnvStoreImpl, env.jniEnvStoreClassName)
             context.createNativeTemplateFile(NativeProtoImpl, env.protoClassName)
         }
 
