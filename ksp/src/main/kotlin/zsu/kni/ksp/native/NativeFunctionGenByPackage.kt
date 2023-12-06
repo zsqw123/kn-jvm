@@ -5,14 +5,25 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ksp.writeTo
+import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.optInExpNativeApiAnnotation
 
 abstract class NativeFunctionGenByPackage(
     private val context: KniContext
 ) {
-    val env = context.envContext
-    val nativeNames = env.nativeNames
+    protected val env = context.envContext
+    protected val nativeNames = env.nativeNames
+
+    protected val directMappingJniNames = setOf(
+        JvmBytecodeType.B.jniName,
+        JvmBytecodeType.D.jniName,
+        JvmBytecodeType.F.jniName,
+        JvmBytecodeType.I.jniName,
+        JvmBytecodeType.J.jniName,
+        JvmBytecodeType.S.jniName,
+    )
+
     abstract val generatedFileName: String
 
     /**
@@ -42,7 +53,7 @@ abstract class NativeFunctionGenByPackage(
         return true
     }
 
-    inline fun FunSpec.Builder.memScoped(content: FunSpec.Builder.() -> Unit) {
+    protected inline fun FunSpec.Builder.memScoped(content: FunSpec.Builder.() -> Unit) {
         beginControlFlow("%M", nativeNames.memScoped)
         content()
         endControlFlow()

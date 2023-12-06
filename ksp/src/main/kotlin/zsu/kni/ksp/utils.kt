@@ -34,11 +34,6 @@ fun KSFunctionDeclaration.actualParentClass(): KSClassDeclaration? {
     return parent
 }
 
-inline val ClassName.serializerName: String
-    get() = canonicalName.replace('.', '/').mangled()
-
-inline val ClassName.internalName get() = canonicalName.replace('.', '/')
-
 fun FunSpec.Builder.addVal(
     paramName: String, initializer: String, vararg args: Any
 ) {

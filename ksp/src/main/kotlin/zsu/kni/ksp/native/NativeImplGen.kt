@@ -3,10 +3,7 @@ package zsu.kni.ksp.native
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
 import zsu.kni.internal.JniTypeName
 import zsu.kni.internal.JvmBytecodeType.*
@@ -117,12 +114,12 @@ class NativeImplGen(
             return
         }
         addStatement(
-            "return $NAME_BRIDGE.c2jType<%T>($NAME_RETURNED, %S, %S)",
+            "return $NAME_BRIDGE.${nativeNames.c2j}<%T>($NAME_RETURNED, %S, %S)",
             returnTypeName, env.serializerInternalName, returnTypeName.serializerName,
         )
     }
 
-    private fun FunSpec.Builder.singleParam(parameter: Pair<ClassName, ParameterSpec>) {
+    private fun FunSpec.Builder.singleParam(parameter: Pair<TypeName, ParameterSpec>) {
         val (originClassName, parameterSpec) = parameter
         val paramName = parameterSpec.name
         val paramType = parameterSpec.type as ClassName
@@ -148,7 +145,7 @@ class NativeImplGen(
             "invalid type: `$simpleTypeName` when process $paramName"
         }
         addVal(
-            realName, "$NAME_BRIDGE.j2cType<%T>($paramName, %S, %S)",
+            realName, "$NAME_BRIDGE.${nativeNames.j2c}<%T>($paramName, %S, %S)",
             originClassName, env.serializerInternalName, originClassName.serializerName,
         )
     }
@@ -157,13 +154,4 @@ class NativeImplGen(
 private const val C_IMPL = "_kni_impl"
 private const val NAME_RETURNED = "returned"
 private const val NAME_BRIDGE = "_bridge"
-
-private val directMappingJniNames = setOf(
-    B.jniName,
-    D.jniName,
-    F.jniName,
-    I.jniName,
-    J.jniName,
-    S.jniName,
-)
 

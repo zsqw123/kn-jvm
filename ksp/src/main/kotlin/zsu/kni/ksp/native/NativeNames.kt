@@ -20,6 +20,24 @@ class NativeNames(private val jniPackage: String) {
 
     val nativeBridge = ClassName("zsu.kni.internal.native", "NativeBridge")
 
+    /**
+     * ```
+     * inline fun <reified T> c2jType(
+     *     cObject: T, jvmSerializerClass: InternalName, jvmSerializerMethod: String
+     * ): O
+     * ```
+     */
+    val c2j = "c2jType"
+
+    /**
+     * ```
+     * inline fun <reified T> c2jType(
+     *     cObject: T, jvmSerializerClass: InternalName, jvmSerializerMethod: String
+     * ): O
+     * ```
+     */
+    val j2c = "j2cType"
+
     val memScoped = cinteropMember("memScoped")
     fun jni(jniTypeName: JniTypeName): ClassName = jni(jniTypeName.jniName)
 }

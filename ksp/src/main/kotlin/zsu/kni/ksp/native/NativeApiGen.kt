@@ -1,9 +1,7 @@
 package zsu.kni.ksp.native
 
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.*
 import zsu.kni.JniApi
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.addVal
@@ -50,7 +48,18 @@ class NativeApiGen(
     }
 
     private fun FunSpec.Builder.singleParam(param: ParameterSpec) {
-        addVal(param.name, )
+        val typeName = param.type
+        val paramName = param.name
+        val realName = "_$paramName"
+        // built in types
+        if (simpleTypeName in directMappingJniNames) {
+            addVal(realName, paramName)
+            return
+        }
+    }
+
+    private fun FunSpec.Builder.buildCall() {
+
     }
 
 
