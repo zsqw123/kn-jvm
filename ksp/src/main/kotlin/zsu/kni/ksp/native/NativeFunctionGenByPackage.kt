@@ -15,15 +15,6 @@ abstract class NativeFunctionGenByPackage(
     protected val env = context.envContext
     protected val nativeNames = env.nativeNames
 
-    protected val directMappingJniNames = setOf(
-        JvmBytecodeType.B.jniName,
-        JvmBytecodeType.D.jniName,
-        JvmBytecodeType.F.jniName,
-        JvmBytecodeType.I.jniName,
-        JvmBytecodeType.J.jniName,
-        JvmBytecodeType.S.jniName,
-    )
-
     abstract val generatedFileName: String
 
     /**

@@ -6,6 +6,7 @@ import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
 import zsu.kni.internal.JniTypeName
+import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.internal.JvmBytecodeType.*
 import zsu.kni.ksp.*
 
@@ -155,3 +156,11 @@ private const val C_IMPL = "_kni_impl"
 private const val NAME_RETURNED = "returned"
 private const val NAME_BRIDGE = "_bridge"
 
+private val directMappingJniNames = setOf(
+    B.jniName,
+    D.jniName,
+    F.jniName,
+    I.jniName,
+    J.jniName,
+    S.jniName,
+)

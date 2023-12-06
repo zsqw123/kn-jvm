@@ -4,7 +4,9 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.getJniName
 import zsu.kni.ksp.isStatic
@@ -13,10 +15,10 @@ class ImplParameters(
     val isStaticCall: Boolean,
     val jEnvPart: ParameterSpec,
     val thisPart: ParameterSpec, // can be jclass or jobject
-    val extensionClassName: ClassName?, // can be null if not exists
+    val extensionClassName: TypeName?, // can be null if not exists
     val extensionPart: ParameterSpec?,
     // originClassTypeName to ParameterSpec
-    val params: List<Pair<ClassName, ParameterSpec>>,
+    val params: List<Pair<TypeName, ParameterSpec>>,
 ) {
     init {
         if (extensionPart != null) require(extensionClassName != null)
@@ -57,19 +59,19 @@ private fun fromInternal(context: KniContext, function: KSFunctionDeclaration): 
     }
     // extension
     val extensionType = function.extensionReceiver?.resolve()
-    var extensionClassName: ClassName? = null
+    var extensionClassName: TypeName? = null
     var extensionPart: ParameterSpec? = null
     if (extensionType != null) {
-        extensionClassName = extensionType.toClassName()
+        extensionClassName = extensionType.toTypeName()
         extensionPart = ParameterSpec(
             "_extension", nativeNames.jni(extensionType.getJniName(context))
         )
     }
     // params
-    val params = ArrayList<Pair<ClassName, ParameterSpec>>(parameters.size)
+    val params = ArrayList<Pair<TypeName, ParameterSpec>>(parameters.size)
     for (parameter in parameters) {
         val paramType = parameter.type.resolve()
-        val paramTypeName = paramType.toClassName()
+        val paramTypeName = paramType.toTypeName()
         val paramTypeJniName = paramType.getJniName(context)
         params += paramTypeName to ParameterSpec(
             "p_${parameter.name!!.asString()}", nativeNames.jni(paramTypeJniName)
