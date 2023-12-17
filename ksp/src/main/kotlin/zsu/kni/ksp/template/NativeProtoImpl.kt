@@ -66,7 +66,7 @@ class $simpleClassName(
                 J -> j = callLong.invoke(envPtr, jObject, methodId, values)
                 S -> s = callShort.invoke(envPtr, jObject, methodId, values)
                 Z -> z = callBoolean.invoke(envPtr, jObject, methodId, values)
-                L -> l = callObject.invoke(envPtr, jObject, methodId, values)
+                L -> l = callObject.invoke(envPtr, jObject, methodId, values) ?: return null
                 V -> {
                     callVoid.invoke(envPtr, jObject, methodId, values)
                     return null
@@ -93,7 +93,7 @@ class $simpleClassName(
                 J -> j = callStaticLong.invoke(envPtr, jClass, methodId, values)
                 S -> s = callStaticShort.invoke(envPtr, jClass, methodId, values)
                 Z -> z = callStaticBoolean.invoke(envPtr, jClass, methodId, values)
-                L -> l = callStaticObject.invoke(envPtr, jClass, methodId, values)
+                L -> l = callStaticObject.invoke(envPtr, jClass, methodId, values) ?: return null
                 V -> {
                     callStaticVoid.invoke(envPtr, jClass, methodId, values)
                     return null

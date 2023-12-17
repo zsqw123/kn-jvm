@@ -25,7 +25,7 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
     proto: NativeProto<O, V, M>,
 ) : NativeProto<O, V, M> by proto {
     /**
-     * @return returns null means no return value: [Unit]
+     * @see [NativeProto.callStatic]
      */
     fun callStatic(
         clazz: InternalName, methodName: String, methodDesc: MethodDesc,
@@ -37,7 +37,7 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
     }
 
     /**
-     * @return returns null means no return value: [Unit]
+     * @see [NativeProto.call]
      */
     fun call(
         obj: O, methodName: String, methodDesc: MethodDesc,

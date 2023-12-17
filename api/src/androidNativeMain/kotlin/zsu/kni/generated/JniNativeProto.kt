@@ -58,7 +58,7 @@ class JniNativeProto(
                 JvmBytecodeType.J -> j = callLong.invoke(envPtr, jObject, methodId, values)
                 JvmBytecodeType.S -> s = callShort.invoke(envPtr, jObject, methodId, values)
                 JvmBytecodeType.Z -> z = callBoolean.invoke(envPtr, jObject, methodId, values)
-                JvmBytecodeType.L -> l = callObject.invoke(envPtr, jObject, methodId, values)
+                JvmBytecodeType.L -> l = callObject.invoke(envPtr, jObject, methodId, values) ?: return null
                 JvmBytecodeType.V -> {
                     callVoid.invoke(envPtr, jObject, methodId, values)
                     return null
@@ -85,7 +85,7 @@ class JniNativeProto(
                 JvmBytecodeType.J -> j = callStaticLong.invoke(envPtr, jClass, methodId, values)
                 JvmBytecodeType.S -> s = callStaticShort.invoke(envPtr, jClass, methodId, values)
                 JvmBytecodeType.Z -> z = callStaticBoolean.invoke(envPtr, jClass, methodId, values)
-                JvmBytecodeType.L -> l = callStaticObject.invoke(envPtr, jClass, methodId, values)
+                JvmBytecodeType.L -> l = callStaticObject.invoke(envPtr, jClass, methodId, values) ?: return null
                 JvmBytecodeType.V -> {
                     callStaticVoid.invoke(envPtr, jClass, methodId, values)
                     return null

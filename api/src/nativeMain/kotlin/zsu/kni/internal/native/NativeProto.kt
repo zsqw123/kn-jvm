@@ -15,7 +15,7 @@ import zsu.kni.internal.MethodDesc
  */
 interface NativeProto<O : CPointer<*>, V : CVariable, M : CPointer<*>> {
     /**
-     * @return returns null means no return value: [Unit]
+     * @return returns null means null object or no return value: [Unit]
      */
     fun callStatic(
         jClass: O, methodId: M,
@@ -24,7 +24,7 @@ interface NativeProto<O : CPointer<*>, V : CVariable, M : CPointer<*>> {
     ): V?
 
     /**
-     * @return returns null means no return value: [Unit]
+     * @return returns null means null object or no return value: [Unit]
      */
     fun call(
         jObject: O, methodId: M,
