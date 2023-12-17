@@ -2,7 +2,9 @@ package zsu.kni.ksp.native
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ksp.toClassName
 import zsu.kni.internal.JniTypeName
 import zsu.kni.internal.JvmBytecodeType.*
@@ -113,33 +115,32 @@ class NativeImplGen(
         return ImplParameters.from(context, function)
     }
 
-    private fun FunSpec.Builder.singleParam(parameter: Pair<TypeName, ParameterSpec>) {
+    private fun FunSpec.Builder.singleParam(parameter: ImplParamRecord) {
         val (originClassName, parameterSpec) = parameter
-        val paramName = parameterSpec.name
+        val oldName = parameterSpec.name
         val paramType = parameterSpec.type as ClassName
         val simpleTypeName = paramType.simpleName
-        val realName = "_$paramName"
+        val newName = "_$oldName"
         // built in types
         if (simpleTypeName in directMappingJniNames) {
-            addVal(realName, paramName)
-            return
+            return addVal(newName, oldName)
         }
         if (simpleTypeName == Z.jniName) {
             // boolean is UByte in KN
-            addVal(realName, "$paramName.toInt() == 1")
-            return
+            return addVal(newName, "$oldName.toInt() == 1")
+
         }
         if (simpleTypeName == C.jniName) {
             // char is UShort in KN
-            addVal(realName, "$paramName.toInt().toChar()")
-            return
+            return addVal(newName, "$oldName.toInt().toChar()")
+
         }
         // custom type, must be jobject
         require(simpleTypeName == L.jniName) {
-            "invalid type: `$simpleTypeName` when process $paramName"
+            "invalid type: `$paramType` when process $oldName"
         }
         addVal(
-            realName, "$NAME_BRIDGE.${nativeNames.j2c}<%T>($paramName, %S, %S)",
+            newName, "$NAME_BRIDGE.${nativeNames.j2c}<%T>($oldName, %S, %S)",
             originClassName, env.serializerInternalName, originClassName.serializerName,
         )
     }

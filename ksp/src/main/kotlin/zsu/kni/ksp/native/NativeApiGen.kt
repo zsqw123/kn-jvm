@@ -3,10 +3,7 @@ package zsu.kni.ksp.native
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.*
 import zsu.kni.JniApi
-import zsu.kni.ksp.KniContext
-import zsu.kni.ksp.addVal
-import zsu.kni.ksp.isStatic
-import zsu.kni.ksp.optAnnotation
+import zsu.kni.ksp.*
 
 /**
  * call jvm from native
@@ -41,7 +38,7 @@ class NativeApiGen(
         }
         val thisPart = parameters.thisPart
         if (!function.isStatic()) {
-            singleParam(thisPart)
+            singleParam("this" to thisPart)
         }
         parameters.params.forEach { singleParam(it) }
     }
@@ -54,14 +51,28 @@ class NativeApiGen(
         TODO("Not yet implemented")
     }
 
-    private fun FunSpec.Builder.singleParam(param: ParameterSpec) {
-        val typeName = param.type
-        val paramName = param.name
+    /** covert native object to jobject */
+    private fun FunSpec.Builder.singleParam(param: ApiParamRecord) {
+        val (oldName, newParam) = param
+        val typeName = newParam.type
+        val newName = newParam.name
         // built in types
-        if (typeName.isPrimitive()) {
-            addVal(paramName, typeName, "origin") // todo
-            return
+        if (typeName in directMappingJniNames) {
+            return addVal(newName, oldName)
         }
+        if (typeName == BOOLEAN) {
+            // boolean is UByte in KN
+            return addVal(newName, "if ($oldName) 1u else 0u")
+        }
+        if (typeName == CHAR) {
+            // char is UShort in KN
+            return addVal(newName, "$oldName.code.toUShort()")
+        }
+        // c object -> jobject
+        addVal(
+            newName, "$NAME_BRIDGE.${nativeNames.c2j}<%T>($oldName, %S, %S)",
+            typeName, env.serializerInternalName, typeName.serializerName,
+        )
     }
 
     private fun KSFunctionDeclaration.envId(): Int {
@@ -79,8 +90,6 @@ private val directMappingJniNames = setOf(
     LONG,
     SHORT,
 )
-
-private fun TypeName.isPrimitive(): Boolean = this in directMappingJniNames
 
 private const val IMPL_POSTFIX = "Impl"
 private const val C_API = "_kni_api"

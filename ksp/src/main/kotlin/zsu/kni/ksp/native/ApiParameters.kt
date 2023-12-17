@@ -9,10 +9,12 @@ import com.squareup.kotlinpoet.ksp.toTypeName
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.actualParentClass
 
+typealias OriginName = String
+typealias ApiParamRecord = Pair<OriginName, ParameterSpec>
+
 class ApiParameters(
     val thisPart: ParameterSpec,
-    // paramName to typeName
-    val params: List<ParameterSpec>,
+    val params: List<ApiParamRecord>,
 ) : Parameters {
     companion object {
         @OptIn(KspExperimental::class)
@@ -31,11 +33,12 @@ class ApiParameters(
             }
             // params
             val parameters = function.parameters
-            val params = ArrayList<ParameterSpec>(parameters.size)
+            val params = ArrayList<ApiParamRecord>(parameters.size)
             for (parameter in parameters) {
+                val paramName = requireNotNull(parameter.name).asString()
                 val paramType = parameter.type.resolve()
                 val paramTypeName = paramType.toTypeName()
-                params += ParameterSpec("p_${parameter.name!!.asString()}", paramTypeName)
+                params += paramName to ParameterSpec("p_$paramName", paramTypeName)
             }
             return ApiParameters(thisPart, params)
         }

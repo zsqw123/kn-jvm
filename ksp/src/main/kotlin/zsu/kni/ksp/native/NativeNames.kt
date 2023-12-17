@@ -31,9 +31,9 @@ class NativeNames(private val jniPackage: String) {
 
     /**
      * ```
-     * inline fun <reified T> c2jType(
-     *     cObject: T, jvmSerializerClass: InternalName, jvmSerializerMethod: String
-     * ): O
+     * fun <T> j2cType(
+     *     jObj: O, jvmSerializerClass: InternalName, jvmGeneratorMethod: String, type: KType
+     * ): T
      * ```
      */
     val j2c = "j2cType"

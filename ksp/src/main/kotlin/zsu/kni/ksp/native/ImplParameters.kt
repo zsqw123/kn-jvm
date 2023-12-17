@@ -9,14 +9,16 @@ import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.getJniName
 import zsu.kni.ksp.isStatic
 
+typealias OriginClassType = TypeName
+typealias ImplParamRecord = Pair<TypeName, ParameterSpec>
+
 class ImplParameters(
     val isStaticCall: Boolean,
     val jEnvPart: ParameterSpec,
     val thisPart: ParameterSpec, // can be jclass or jobject
     val extensionClassName: TypeName?, // can be null if not exists
     val extensionPart: ParameterSpec?,
-    // originClassTypeName to ParameterSpec
-    val params: List<Pair<TypeName, ParameterSpec>>,
+    val params: List<ImplParamRecord>,
 ) : Parameters {
     init {
         if (extensionPart != null) require(extensionClassName != null)
