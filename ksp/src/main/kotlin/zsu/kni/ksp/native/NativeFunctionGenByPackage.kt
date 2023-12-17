@@ -5,10 +5,11 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ksp.writeTo
+import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.optInExpNativeApiAnnotation
 
-abstract class NativeFunctionGenByPackage<P : Parameters>(
+abstract class NativeFunctionGenByPackage<P : ProcessingParameters>(
     private val context: KniContext
 ) {
     protected val env = context.envContext
@@ -50,6 +51,7 @@ abstract class NativeFunctionGenByPackage<P : Parameters>(
 
     private fun generateFile(filePackage: String, functions: List<KSFunctionDeclaration>): FileSpec {
         val fileBuilder = FileSpec.builder(filePackage, generatedFileName)
+            .addImport(JvmBytecodeType::class)
             .addAnnotation(optInExpNativeApiAnnotation)
         for (function in functions) {
             fileBuilder.addFunction(buildFunction(function))

@@ -48,6 +48,14 @@ class NativeBridge<O : CPointer<*>, V : CVariable, M : CPointer<*>>(
         return call(obj, methodId, args.toArrayPtr(), returnType)
     }
 
+    /** wrap j-xxx(such as jobject/jint) -> jvalue */
+    fun objAsValue(any: Any, jvmBytecodeType: JvmBytecodeType): V {
+        @Suppress("UNCHECKED_CAST")
+        return if (jvmBytecodeType == JvmBytecodeType.L) {
+            (any as O).obtainV // jobject
+        } else any.anyAsV // other types
+    }
+
     /**
      * @param jObj java object
      * @return native object

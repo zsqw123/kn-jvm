@@ -5,6 +5,7 @@ import kotlin.jvm.JvmInline
 // eg: jint/jboolean...
 @JvmInline
 value class JniTypeName(val jniName: String) {
+    fun toBytecodeType(): JvmBytecodeType = JvmBytecodeType.valueOf(jniName)
     companion object {
         val VOID = JniTypeName("void")
     }

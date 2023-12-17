@@ -2,7 +2,9 @@ package zsu.kni.ksp.native
 
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.MemberName.Companion.member
 import zsu.kni.JniApi
+import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.ksp.*
 
 /**
@@ -36,15 +38,46 @@ class NativeApiGen(
         require(function.extensionReceiver == null) {
             "call extension function from native to java is not support yet."
         }
-        val thisPart = parameters.thisPart
-        if (!function.isStatic()) {
-            singleParam("this" to thisPart)
-        }
+        if (!function.isStatic()) singleParam(
+            ApiParamRecord("this", ParameterSpec("_this", parameters.thisPart))
+        )
         parameters.params.forEach { singleParam(it) }
     }
 
     override fun FunSpec.Builder.buildMethodCall(function: KSFunctionDeclaration, parameters: ApiParameters) {
-        TODO("Not yet implemented")
+        val args = parameters.params.joinToString(
+            separator = ", ", prefix = "listOf(", postfix = ")"
+        ) {
+            "${it.jvmBytecodeType.asRawMember()} to ${it.param.name}"
+        }
+        addVal("_args", args)
+        val returnBytecodeType = function.returnType!!.resolve().getJniName(context).toBytecodeType()
+        val bytecodeRaw = returnBytecodeType.asRawMember()
+        val functionName = function.simpleName.asString()
+        val methodDesc = requireNotNull(context.optMethodDesc(function)) {
+            "get method desc failed: $function"
+        }
+        if (function.isStatic()) {
+            val internalName = parameters.thisPart.internalName
+            addVal(
+                JVM_RESULT,
+                "%M($internalName, $functionName, $methodDesc, _args, $bytecodeRaw)",
+                nativeNames.callStaticMember
+            )
+        } else {
+            val thisJObjName = "_thisJ"
+            val thisTypeName = parameters.thisPart
+            addVal(
+                thisJObjName,
+                "$NAME_BRIDGE.${nativeNames.c2j}<%T>($JVM_RESULT, %S, %S)",
+                thisTypeName, env.serializerInternalName, thisTypeName.serializerName
+            )
+            addVal(
+                JVM_RESULT,
+                "%M($thisJObjName, $functionName, $methodDesc, _args, $bytecodeRaw)",
+                nativeNames.callMember
+            )
+        }
     }
 
     override fun FunSpec.Builder.buildReturn(function: KSFunctionDeclaration, parameters: ApiParameters) {
@@ -52,25 +85,37 @@ class NativeApiGen(
     }
 
     /** covert native object to jobject */
-    private fun FunSpec.Builder.singleParam(param: ApiParamRecord) {
-        val (oldName, newParam) = param
+    private fun FunSpec.Builder.singleParam(record: ApiParamRecord) {
+        val (oldName, newParam) = record
+        val bytecodeType = record.jvmBytecodeType
         val typeName = newParam.type
         val newName = newParam.name
+
+        fun addVal(
+            initializer: String, vararg args: Any,
+        ) {
+            addVal(
+                paramName = newName,
+                initializer = "$NAME_BRIDGE.${nativeNames.objAsValue}($initializer, %M)",
+                *args, bytecodeType
+            )
+        }
+
         // built in types
         if (typeName in directMappingJniNames) {
-            return addVal(newName, oldName)
+            return addVal(initializer = oldName)
         }
         if (typeName == BOOLEAN) {
             // boolean is UByte in KN
-            return addVal(newName, "if ($oldName) 1u else 0u")
+            return addVal(initializer = "if ($oldName) 1u else 0u")
         }
         if (typeName == CHAR) {
             // char is UShort in KN
-            return addVal(newName, "$oldName.code.toUShort()")
+            return addVal(initializer = "$oldName.code.toUShort()")
         }
         // c object -> jobject
         addVal(
-            newName, "$NAME_BRIDGE.${nativeNames.c2j}<%T>($oldName, %S, %S)",
+            initializer = "$NAME_BRIDGE.${nativeNames.c2j}<%T>($oldName, %S, %S)",
             typeName, env.serializerInternalName, typeName.serializerName,
         )
     }
@@ -94,3 +139,14 @@ private val directMappingJniNames = setOf(
 private const val IMPL_POSTFIX = "Impl"
 private const val C_API = "_kni_api"
 private const val NAME_BRIDGE = "_bridge"
+private const val JVM_RESULT = "result" // type: jvalue
+
+private val jvmBytecodeClassName = JvmBytecodeType::class.asClassName()
+
+private fun JvmBytecodeType.asMember(): MemberName {
+    return jvmBytecodeClassName.member(name)
+}
+
+private fun JvmBytecodeType.asRawMember(): String {
+    return "${jvmBytecodeClassName.simpleName}.$name"
+}

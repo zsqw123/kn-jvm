@@ -2,34 +2,50 @@ package zsu.kni.ksp.native
 
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
+import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.actualParentClass
 
 typealias OriginName = String
-typealias ApiParamRecord = Pair<OriginName, ParameterSpec>
+
+data class ApiParamRecord(
+    val originName: OriginName,
+    val param: ParameterSpec,
+) {
+    val jvmBytecodeType: JvmBytecodeType = when (param.type) {
+        BYTE -> JvmBytecodeType.B
+        CHAR -> JvmBytecodeType.C
+        DOUBLE -> JvmBytecodeType.D
+        FLOAT -> JvmBytecodeType.F
+        INT -> JvmBytecodeType.I
+        LONG -> JvmBytecodeType.J
+        SHORT -> JvmBytecodeType.S
+        BOOLEAN -> JvmBytecodeType.Z
+        else -> JvmBytecodeType.L
+    }
+}
 
 class ApiParameters(
-    val thisPart: ParameterSpec,
+    val thisPart: ClassName,
     val params: List<ApiParamRecord>,
-) : Parameters {
+) : ProcessingParameters {
     companion object {
         @OptIn(KspExperimental::class)
         fun from(context: KniContext, function: KSFunctionDeclaration): ApiParameters {
-            var thisPart: ParameterSpec? = null
+            var thisPart: ClassName? = null
             val actualParentClass = function.actualParentClass()
             if (actualParentClass != null) {
-                thisPart = ParameterSpec("_this", actualParentClass.toClassName())
+                thisPart = actualParentClass.toClassName()
             }
             if (thisPart == null) {
                 val staticClassName = context.resolver.getOwnerJvmClassName(function)
                     ?: throw IllegalArgumentException(
                         "cannot process $function(qualified: ${function.qualifiedName})"
                     )
-                thisPart = ParameterSpec("_this", ClassName.bestGuess(staticClassName))
+                thisPart = ClassName.bestGuess(staticClassName)
             }
             // params
             val parameters = function.parameters
@@ -38,7 +54,7 @@ class ApiParameters(
                 val paramName = requireNotNull(parameter.name).asString()
                 val paramType = parameter.type.resolve()
                 val paramTypeName = paramType.toTypeName()
-                params += paramName to ParameterSpec("p_$paramName", paramTypeName)
+                params += ApiParamRecord(paramName, ParameterSpec("p_$paramName", paramTypeName))
             }
             return ApiParameters(thisPart, params)
         }

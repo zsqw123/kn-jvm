@@ -19,7 +19,7 @@ class ImplParameters(
     val extensionClassName: TypeName?, // can be null if not exists
     val extensionPart: ParameterSpec?,
     val params: List<ImplParamRecord>,
-) : Parameters {
+) : ProcessingParameters {
     init {
         if (extensionPart != null) require(extensionClassName != null)
     }

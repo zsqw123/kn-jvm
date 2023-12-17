@@ -1,13 +1,16 @@
 package zsu.kni.ksp
 
+import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.MemberName
 import zsu.kni.internal.InternalName
+import zsu.kni.internal.MethodDesc
 import zsu.kni.ksp.native.NativeNames
 
 class KniEnvContext(env: SymbolProcessorEnvironment) : KSPLogger by env.logger {
@@ -46,5 +49,10 @@ class KniContext(
     // get class from poet ClassName
     fun optClass(className: ClassName): KSClassDeclaration? {
         return resolver.getClassDeclarationByName(className.canonicalName)
+    }
+
+    @OptIn(KspExperimental::class)
+    fun optMethodDesc(function: KSFunctionDeclaration): MethodDesc? {
+        return resolver.mapToJvmSignature(function)
     }
 }

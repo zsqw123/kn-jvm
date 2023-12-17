@@ -22,6 +22,26 @@ class NativeNames(private val jniPackage: String) {
 
     /**
      * ```
+     * fun call(
+     *     obj: O, methodName: String, methodDesc: MethodDesc,
+     *     args: List<Pair<JvmBytecodeType, V>>, returnType: JvmBytecodeType,
+     * ): V?
+     * ```
+     */
+    val callMember = MemberName(nativeBridge, "call")
+
+    /**
+     * ```
+     * fun callStatic(
+     *     clazz: InternalName, methodName: String, methodDesc: MethodDesc,
+     *     args: List<Pair<JvmBytecodeType, V>>, returnType: JvmBytecodeType,
+     * ): V?
+     * ```
+     */
+    val callStaticMember = MemberName(nativeBridge, "callStatic")
+
+    /**
+     * ```
      * inline fun <reified T> c2jType(
      *     cObject: T, jvmSerializerClass: InternalName, jvmSerializerMethod: String
      * ): O
@@ -37,6 +57,14 @@ class NativeNames(private val jniPackage: String) {
      * ```
      */
     val j2c = "j2cType"
+
+    /**
+     * NativeBridge.objAsValue
+     * ```
+     * fun objAsValue(any: Any, jvmBytecodeType: JvmBytecodeType): V
+     * ```
+     */
+    val objAsValue = "objAsValue"
 
     val memScoped = cinteropMember("memScoped")
     fun jni(jniTypeName: JniTypeName): ClassName = jni(jniTypeName.jniName)
