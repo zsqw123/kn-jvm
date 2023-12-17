@@ -8,6 +8,7 @@ import com.squareup.kotlinpoet.ksp.toTypeName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.actualParentClass
+import zsu.kni.ksp.getJniName
 
 typealias OriginName = String
 
@@ -31,6 +32,8 @@ data class ApiParamRecord(
 class ApiParameters(
     val thisPart: ClassName,
     val params: List<ApiParamRecord>,
+    val returnTypeName: TypeName,
+    val returnBytecodeType: JvmBytecodeType,
 ) : ProcessingParameters {
     companion object {
         @OptIn(KspExperimental::class)
@@ -56,7 +59,18 @@ class ApiParameters(
                 val paramTypeName = paramType.toTypeName()
                 params += ApiParamRecord(paramName, ParameterSpec("p_$paramName", paramTypeName))
             }
-            return ApiParameters(thisPart, params)
+            // return
+            val returnType = function.returnType?.resolve()
+            val returnTypeName: TypeName
+            val returnBytecodeType: JvmBytecodeType
+            if (returnType == null) {
+                returnTypeName = UNIT
+                returnBytecodeType = JvmBytecodeType.V
+            } else {
+                returnTypeName = returnType.toTypeName()
+                returnBytecodeType = returnType.getJniName(context).toBytecodeType()
+            }
+            return ApiParameters(thisPart, params, returnTypeName, returnBytecodeType)
         }
     }
 }

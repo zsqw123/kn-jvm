@@ -51,8 +51,8 @@ class NativeNames(private val jniPackage: String) {
 
     /**
      * ```
-     * fun <T> j2cType(
-     *     jObj: O, jvmSerializerClass: InternalName, jvmGeneratorMethod: String, type: KType
+     * inline fun <reified T> j2cType(
+     *     jObj: O, jvmSerializerClass: InternalName, jvmGeneratorMethod: String,
      * ): T
      * ```
      */

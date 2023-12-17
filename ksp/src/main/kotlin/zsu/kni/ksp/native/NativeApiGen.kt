@@ -4,6 +4,7 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.MemberName.Companion.member
 import zsu.kni.JniApi
+import zsu.kni.internal.JniTypeName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.ksp.*
 
@@ -51,8 +52,7 @@ class NativeApiGen(
             "${it.jvmBytecodeType.asRawMember()} to ${it.param.name}"
         }
         addVal("_args", args)
-        val returnBytecodeType = function.returnType!!.resolve().getJniName(context).toBytecodeType()
-        val bytecodeRaw = returnBytecodeType.asRawMember()
+        val bytecodeRaw = parameters.returnBytecodeType.asRawMember()
         val functionName = function.simpleName.asString()
         val methodDesc = requireNotNull(context.optMethodDesc(function)) {
             "get method desc failed: $function"
@@ -81,7 +81,16 @@ class NativeApiGen(
     }
 
     override fun FunSpec.Builder.buildReturn(function: KSFunctionDeclaration, parameters: ApiParameters) {
-        TODO("Not yet implemented")
+        val returnBytecodeType = parameters.returnBytecodeType
+        // no need process for void
+        if (returnBytecodeType.jniName == JniTypeName.VOID.jniName) return
+        val returnTypeName = parameters.returnTypeName
+        returns(returnTypeName)
+        addStatement("$JVM_RESULT ?: return null")
+        addStatement(
+            "return $NAME_BRIDGE.${nativeNames.j2c}<%T>($JVM_RESULT!!, %S, %S)",
+            returnTypeName, env.serializerInternalName, returnTypeName.serializerName,
+        )
     }
 
     /** covert native object to jobject */
