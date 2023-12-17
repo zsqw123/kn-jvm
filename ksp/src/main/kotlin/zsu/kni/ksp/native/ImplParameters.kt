@@ -2,10 +2,8 @@ package zsu.kni.ksp.native
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import zsu.kni.ksp.KniContext
 import zsu.kni.ksp.getJniName
@@ -19,7 +17,7 @@ class ImplParameters(
     val extensionPart: ParameterSpec?,
     // originClassTypeName to ParameterSpec
     val params: List<Pair<TypeName, ParameterSpec>>,
-) {
+) : Parameters {
     init {
         if (extensionPart != null) require(extensionClassName != null)
     }

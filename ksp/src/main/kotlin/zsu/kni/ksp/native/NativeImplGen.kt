@@ -2,85 +2,67 @@ package zsu.kni.ksp.native
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toClassName
 import zsu.kni.internal.JniTypeName
-import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.internal.JvmBytecodeType.*
 import zsu.kni.ksp.*
 
 class NativeImplGen(
     private val context: KniContext
-) : NativeFunctionGenByPackage(context) {
+) : NativeFunctionGenByPackage<ImplParameters>(context) {
     override val generatedFileName: String = C_IMPL
 
-    override fun singleFunction(function: KSFunctionDeclaration): FunSpec {
+    override fun prepareBuilder(function: KSFunctionDeclaration): FunSpec.Builder {
         val jniName = function.getJniName(context)
-
         val cNameSpec = AnnotationSpec.builder(cNameClassName)
             .addMember("externName = %S", jniName.fullName).build()
         val parameterContainer = ImplParameters.from(context, function)
-        val funBuilder = FunSpec.builder("${jniName.ownerName}_${jniName.methodName}")
+        return FunSpec.builder("${jniName.ownerName}_${jniName.methodName}")
             .addParameters(parameterContainer.collectAllSpec())
             .addAnnotation(cNameSpec)
-
-        // get returns
-        val returnType = function.returnType!!.resolve()
-        val returnJniName = returnType.getJniName(context)
-        // no need returns for void type
-        val needReturns = returnJniName == JniTypeName.VOID
-
-        funBuilder.memScoped {
-            // build proto & bridge
-            addVal(
-                "_proto", "%T(${parameterContainer.jEnvPart.name}, this)",
-                env.protoClassName
-            )
-            addVal(NAME_BRIDGE, "%T(_proto)", nativeNames.nativeBridge)
-            // build params
-            buildAllParams(function, parameterContainer)
-            // call native function call
-            buildCall(function, parameterContainer)
-            // return value
-            if (needReturns) buildReturn(returnType, returnJniName)
-        }
-
-        return funBuilder.build()
     }
 
-    private fun FunSpec.Builder.buildAllParams(
+    override fun FunSpec.Builder.buildNativeBridge(function: KSFunctionDeclaration, parameters: ImplParameters) {
+        addVal(
+            "_proto", "%T(${parameters.jEnvPart.name}, this)",
+            env.protoClassName
+        )
+        addVal(NAME_BRIDGE, "%T(_proto)", nativeNames.nativeBridge)
+    }
+
+    override fun FunSpec.Builder.buildAllParams(
         function: KSFunctionDeclaration,
-        implParameters: ImplParameters,
+        parameters: ImplParameters,
     ) {
-        if (!implParameters.isStaticCall) {
+        if (!parameters.isStaticCall) {
             val thisClassName = (function.parentDeclaration as KSClassDeclaration).toClassName()
-            singleParam(thisClassName to implParameters.thisPart)
+            singleParam(thisClassName to parameters.thisPart)
         }
-        if (implParameters.extensionPart != null && implParameters.extensionClassName != null) {
-            singleParam(implParameters.extensionClassName to implParameters.extensionPart)
+        if (parameters.extensionPart != null && parameters.extensionClassName != null) {
+            singleParam(parameters.extensionClassName to parameters.extensionPart)
         }
-        implParameters.params.forEach { singleParam(it) }
+        parameters.params.forEach { singleParam(it) }
     }
 
-    private fun FunSpec.Builder.buildCall(
+    override fun FunSpec.Builder.buildMethodCall(
         function: KSFunctionDeclaration,
-        implParameters: ImplParameters,
+        parameters: ImplParameters,
     ) {
         // normal call
-        var callCode = implParameters.params.joinToString(
+        var callCode = parameters.params.joinToString(
             separator = ", ", prefix = "%M(", postfix = ")",
         ) { "_${it.second.name}" }
 
-        if (implParameters.extensionPart != null) {
+        if (parameters.extensionPart != null) {
             // has extension
-            callCode = "_${implParameters.extensionPart.name}.$callCode"
+            callCode = "_${parameters.extensionPart.name}.$callCode"
         }
 
-        val isStatic = implParameters.isStaticCall
+        val isStatic = parameters.isStaticCall
         if (!isStatic) {
             // non-static, wrap this with {
-            beginControlFlow("with(_${implParameters.thisPart.name})")
+            beginControlFlow("with(_${parameters.thisPart.name})")
         }
 
         addVal(NAME_RETURNED, callCode, function.asMemberName())
@@ -91,10 +73,17 @@ class NativeImplGen(
         }
     }
 
-    private fun FunSpec.Builder.buildReturn(
-        returnType: KSType,
-        returnJniName: JniTypeName,
+    override fun FunSpec.Builder.buildReturn(
+        function: KSFunctionDeclaration, parameters: ImplParameters
     ) {
+        // get returns
+        val returnType = function.returnType!!.resolve()
+        val returnJniName = returnType.getJniName(context)
+        // no need returns for void type
+        val needReturns = returnJniName != JniTypeName.VOID
+
+        if (!needReturns) return
+
         val returnTypeName = returnType.toClassName()
         val returnJniNameName = returnJniName.jniName
         val returnJniClassName = nativeNames.jni(returnJniName)
@@ -106,7 +95,7 @@ class NativeImplGen(
         }
         if (returnJniNameName == B.jniName) {
             // boolean is UByte in KN
-            addStatement("return if ($NAME_RETURNED) 1.toUByte() else 0.toUByte()")
+            addStatement("return if ($NAME_RETURNED) 1u else 0u")
             return
         }
         if (returnJniNameName == C.jniName) {
@@ -120,6 +109,10 @@ class NativeImplGen(
         )
     }
 
+    override fun parametersFromFunction(function: KSFunctionDeclaration): ImplParameters {
+        return ImplParameters.from(context, function)
+    }
+
     private fun FunSpec.Builder.singleParam(parameter: Pair<TypeName, ParameterSpec>) {
         val (originClassName, parameterSpec) = parameter
         val paramName = parameterSpec.name
@@ -131,7 +124,7 @@ class NativeImplGen(
             addVal(realName, paramName)
             return
         }
-        if (simpleTypeName == B.jniName) {
+        if (simpleTypeName == Z.jniName) {
             // boolean is UByte in KN
             addVal(realName, "$paramName.toInt() == 1")
             return

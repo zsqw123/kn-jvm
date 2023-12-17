@@ -108,7 +108,20 @@ class JniNativeProto(
         get() = l!!
 
     override val jobject.obtainV: jvalue
-        get() = memAllocator.alloc<jvalue>().also { it.l = this }
+        get() = memAllocator.alloc<jvalue> { l = this@obtainV }
+
+    override val Any.anyAsV: jvalue
+        get() = memAllocator.alloc<jvalue> {
+            when (val origin = this@anyAsV) {
+                is Byte -> b = origin
+                is Double -> d = origin
+                is Float -> f = origin
+                is Int -> i = origin
+                is Long -> j = origin
+                is Short -> s = origin
+                is Boolean -> z = if (origin) 1u else 0u
+            }
+        }
 
     override fun getMethodId(
         jClass: jobject, isStatic: Boolean,
@@ -128,7 +141,7 @@ class JniNativeProto(
     private val releaseBytesPtr = jEnv.ReleaseByteArrayElements!!
     override fun getBytes(jByteArray: jbyteArray): NativeProto.JBytes = memScoped {
         val jBoolean = alloc<jbooleanVar>()
-        jBoolean.value = JNI_FALSE.toUByte()
+        jBoolean.value = 0u
         val values = getBytesPtr.invoke(envPtr, jByteArray, jBoolean.ptr)!!
         val length = getBytesLengthPtr.invoke(envPtr, jByteArray)
         NativeProto.JBytes(values, length)

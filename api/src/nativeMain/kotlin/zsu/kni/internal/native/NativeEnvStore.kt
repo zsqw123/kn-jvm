@@ -21,7 +21,7 @@ object NativeEnvStore {
     }
 
     /** must ensure you will acquire a JNIEnv */
-    operator fun <V : CPointed> get(id: Int): CPointer<V> {
+    operator fun <V : JNIEnvVar> get(id: Int): CPointer<V> {
         val jEnvPtr = envStoreMap[id] ?: throw IllegalStateException(
             "cannot found thread id $id when try to acquire jni environment. " +
                     "pls check if you have added this id in KniNativeThread(in jvm)."

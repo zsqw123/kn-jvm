@@ -6,6 +6,7 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.MemberName
 import zsu.kni.internal.InternalName
 import zsu.kni.ksp.native.NativeNames
 
@@ -17,6 +18,7 @@ class KniEnvContext(env: SymbolProcessorEnvironment) : KSPLogger by env.logger {
     val protoClassName = ClassName(generatedPackage, protoName)
 
     val envStoreClassName = ClassName("zsu.kni.internal.native", "NativeEnvStore")
+    val envGetMember = MemberName(envStoreClassName,"get")
 
     val jniEnvStoreName = options["kni-generated-env-store-name"] ?: "JniNativeEnvStore"
     val jniEnvStoreClassName = ClassName(generatedPackage, jniEnvStoreName)
