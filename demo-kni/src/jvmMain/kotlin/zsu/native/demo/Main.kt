@@ -2,9 +2,10 @@ package zsu.native.demo
 
 import sample.Foo
 import sample.nativePlus
+import zsu.kni.JniApi
+import zsu.kni.KniNativeThread
 import java.io.File
 import kotlin.io.path.createTempDirectory
-import kotlin.system.measureTimeMillis
 
 @Suppress("UnsafeDynamicallyLoadedCode")
 fun loadDemoLib() {
@@ -25,13 +26,16 @@ fun loadDemoLib() {
 
 fun main() {
     loadDemoLib()
-    println(nativePlus(1, Foo("f")).v)
-    val sameFoo = Foo("f")
-    val costs = measureTimeMillis {
-        repeat(1_000_000) {
-            nativePlus(it % 113, sameFoo).v
-        }
+    KniNativeThread.attach(JniApi.DEFAULT)
+
+    val expect0 = "native: f, 1"
+    val actual0 = nativePlus(1, Foo("f")).v
+    assert(expect0 == actual0) {
+        "expect: $expect0, actual: $actual0"
     }
-    println(costs)
+    var calledFromNative = false
+    while (!calledFromNative) {
+
+    }
 }
 

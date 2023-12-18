@@ -4,6 +4,7 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.ksp.KniContext
@@ -20,7 +21,7 @@ abstract class NativeFunctionGenByPackage<P : ProcessingParameters>(
     abstract fun parametersFromFunction(function: KSFunctionDeclaration): P
 
     // STEP0: prepare a builder
-    abstract fun prepareBuilder(function: KSFunctionDeclaration): FunSpec.Builder
+    abstract fun prepareBuilder(function: KSFunctionDeclaration, parameters: P): FunSpec.Builder
 
     // STEP1: build proto & bridge
     abstract fun FunSpec.Builder.buildNativeBridge(function: KSFunctionDeclaration, parameters: P)
@@ -41,7 +42,7 @@ abstract class NativeFunctionGenByPackage<P : ProcessingParameters>(
      */
     private fun buildFunction(function: KSFunctionDeclaration): FunSpec {
         val parameters = parametersFromFunction(function)
-        return prepareBuilder(function).memScoped {
+        return prepareBuilder(function, parameters).memScoped {
             buildNativeBridge(function, parameters)
             buildAllParams(function, parameters)
             buildMethodCall(function, parameters)
@@ -51,7 +52,7 @@ abstract class NativeFunctionGenByPackage<P : ProcessingParameters>(
 
     private fun generateFile(filePackage: String, functions: List<KSFunctionDeclaration>): FileSpec {
         val fileBuilder = FileSpec.builder(filePackage, generatedFileName)
-            .addImport(JvmBytecodeType::class)
+            .addImport(jvmBytecodeType.packageName, jvmBytecodeType.simpleName)
             .addAnnotation(optInExpNativeApiAnnotation)
         for (function in functions) {
             fileBuilder.addFunction(buildFunction(function))
@@ -79,3 +80,5 @@ abstract class NativeFunctionGenByPackage<P : ProcessingParameters>(
         endControlFlow()
     }
 }
+
+private val jvmBytecodeType = JvmBytecodeType::class.asClassName()

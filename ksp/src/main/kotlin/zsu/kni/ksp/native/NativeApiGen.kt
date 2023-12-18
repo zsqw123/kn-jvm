@@ -4,7 +4,6 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.MemberName.Companion.member
 import zsu.kni.JniApi
-import zsu.kni.internal.JniTypeName
 import zsu.kni.internal.JvmBytecodeType
 import zsu.kni.ksp.*
 
@@ -20,8 +19,12 @@ class NativeApiGen(
         return ApiParameters.from(context, function)
     }
 
-    override fun prepareBuilder(function: KSFunctionDeclaration): FunSpec.Builder {
+    override fun prepareBuilder(function: KSFunctionDeclaration, parameters: ApiParameters): FunSpec.Builder {
+        val originParameters = parameters.params.map {
+            ParameterSpec(it.originName, it.paramType)
+        }
         return FunSpec.builder(function.simpleName.asString() + IMPL_POSTFIX)
+            .addParameters(originParameters)
     }
 
     override fun FunSpec.Builder.buildNativeBridge(function: KSFunctionDeclaration, parameters: ApiParameters) {
@@ -40,7 +43,7 @@ class NativeApiGen(
             "call extension function from native to java is not support yet."
         }
         if (!function.isStatic()) singleParam(
-            ApiParamRecord("this", ParameterSpec("_this", parameters.thisPart))
+            ApiParamRecord("this", "_this", parameters.thisPart)
         )
         parameters.params.forEach { singleParam(it) }
     }
@@ -49,7 +52,7 @@ class NativeApiGen(
         val args = parameters.params.joinToString(
             separator = ", ", prefix = "listOf(", postfix = ")"
         ) {
-            "${it.jvmBytecodeType.asRawMember()} to ${it.param.name}"
+            "${it.jvmBytecodeType.asRawMember()} to ${it.newName}"
         }
         addVal("_args", args)
         val bytecodeRaw = parameters.returnBytecodeType.asRawMember()
@@ -61,8 +64,9 @@ class NativeApiGen(
             val internalName = parameters.thisPart.internalName
             addVal(
                 JVM_RESULT,
-                "%M($internalName, $functionName, $methodDesc, _args, $bytecodeRaw)",
-                nativeNames.callStaticMember
+                "$NAME_BRIDGE.%N(%S, %S, %S, _args, $bytecodeRaw)",
+                nativeNames.callStaticMember,
+                internalName, functionName, methodDesc,
             )
         } else {
             val thisJObjName = "_thisJ"
@@ -74,8 +78,8 @@ class NativeApiGen(
             )
             addVal(
                 JVM_RESULT,
-                "%M($thisJObjName, $functionName, $methodDesc, _args, $bytecodeRaw)",
-                nativeNames.callMember
+                "$NAME_BRIDGE.%N($thisJObjName, %S, %S, _args, $bytecodeRaw)",
+                nativeNames.callMember, functionName, methodDesc
             )
         }
     }
@@ -83,30 +87,43 @@ class NativeApiGen(
     override fun FunSpec.Builder.buildReturn(function: KSFunctionDeclaration, parameters: ApiParameters) {
         val returnBytecodeType = parameters.returnBytecodeType
         // no need process for void
-        if (returnBytecodeType.jniName == JniTypeName.VOID.jniName) return
+        if (returnBytecodeType == JvmBytecodeType.V) return
         val returnTypeName = parameters.returnTypeName
         returns(returnTypeName)
-        addStatement("$JVM_RESULT ?: return null")
-        addStatement(
-            "return $NAME_BRIDGE.${nativeNames.j2c}<%T>($JVM_RESULT!!, %S, %S)",
-            returnTypeName, env.serializerInternalName, returnTypeName.serializerName,
-        )
+        if (returnTypeName.isNullable) {
+            addStatement("$JVM_RESULT ?: return null")
+        } else {
+            addStatement("$JVM_RESULT!!")
+        }
+        // basic types
+        val realReturnProp = "_$JVM_RESULT"
+        var realReturnPropInitializer = "$JVM_RESULT.${returnBytecodeType.jvaluePropName}"
+        realReturnPropInitializer += if (returnTypeName.isNullable) " ?: return null" else "!!"
+        addVal(realReturnProp, realReturnPropInitializer)
+        when (returnBytecodeType) {
+            JvmBytecodeType.Z -> addStatement("return $realReturnProp == 1u")
+            JvmBytecodeType.C -> addStatement("return $realReturnProp.toInt().toChar()")
+            JvmBytecodeType.L -> addStatement(
+                // jobject
+                "return $NAME_BRIDGE.${nativeNames.j2c}<%T>($realReturnProp, %S, %S)",
+                returnTypeName, env.serializerInternalName, returnTypeName.serializerName,
+            )
+
+            else -> {}
+        }
     }
 
     /** covert native object to jobject */
     private fun FunSpec.Builder.singleParam(record: ApiParamRecord) {
-        val (oldName, newParam) = record
+        val (oldName, newName, typeName) = record
         val bytecodeType = record.jvmBytecodeType
-        val typeName = newParam.type
-        val newName = newParam.name
-
         fun addVal(
             initializer: String, vararg args: Any,
         ) {
             addVal(
                 paramName = newName,
                 initializer = "$NAME_BRIDGE.${nativeNames.objAsValue}($initializer, %M)",
-                *args, bytecodeType
+                *args, bytecodeType.asMember(),
             )
         }
 

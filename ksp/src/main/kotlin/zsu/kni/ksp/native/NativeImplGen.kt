@@ -15,13 +15,12 @@ class NativeImplGen(
 ) : NativeFunctionGenByPackage<ImplParameters>(context) {
     override val generatedFileName: String = C_IMPL
 
-    override fun prepareBuilder(function: KSFunctionDeclaration): FunSpec.Builder {
+    override fun prepareBuilder(function: KSFunctionDeclaration, parameters: ImplParameters): FunSpec.Builder {
         val jniName = function.getJniName(context)
         val cNameSpec = AnnotationSpec.builder(cNameClassName)
             .addMember("externName = %S", jniName.fullName).build()
-        val parameterContainer = ImplParameters.from(context, function)
         return FunSpec.builder("${jniName.ownerName}_${jniName.methodName}")
-            .addParameters(parameterContainer.collectAllSpec())
+            .addParameters(parameters.collectAllSpec())
             .addAnnotation(cNameSpec)
     }
 
@@ -95,7 +94,7 @@ class NativeImplGen(
             addStatement("return $NAME_RETURNED")
             return
         }
-        if (returnJniNameName == B.jniName) {
+        if (returnJniNameName == Z.jniName) {
             // boolean is UByte in KN
             addStatement("return if ($NAME_RETURNED) 1u else 0u")
             return

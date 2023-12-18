@@ -10,7 +10,7 @@ import zsu.kni.ksp.getJniName
 import zsu.kni.ksp.isStatic
 
 typealias OriginClassType = TypeName
-typealias ImplParamRecord = Pair<TypeName, ParameterSpec>
+typealias ImplParamRecord = Pair<OriginClassType, ParameterSpec>
 
 class ImplParameters(
     val isStaticCall: Boolean,

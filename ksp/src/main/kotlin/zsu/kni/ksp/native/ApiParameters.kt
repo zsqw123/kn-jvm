@@ -14,9 +14,10 @@ typealias OriginName = String
 
 data class ApiParamRecord(
     val originName: OriginName,
-    val param: ParameterSpec,
+    val newName: String,
+    val paramType: TypeName,
 ) {
-    val jvmBytecodeType: JvmBytecodeType = when (param.type) {
+    val jvmBytecodeType: JvmBytecodeType = when (paramType) {
         BYTE -> JvmBytecodeType.B
         CHAR -> JvmBytecodeType.C
         DOUBLE -> JvmBytecodeType.D
@@ -57,7 +58,7 @@ class ApiParameters(
                 val paramName = requireNotNull(parameter.name).asString()
                 val paramType = parameter.type.resolve()
                 val paramTypeName = paramType.toTypeName()
-                params += ApiParamRecord(paramName, ParameterSpec("p_$paramName", paramTypeName))
+                params += ApiParamRecord(paramName, "p_$paramName", paramTypeName)
             }
             // return
             val returnType = function.returnType?.resolve()
