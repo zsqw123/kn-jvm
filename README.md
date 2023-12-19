@@ -107,9 +107,9 @@ in these cases, `10 μs` may be acceptable.
 
 ### Gradle Setup
 
-[Maven Central: kni-api](https://central.sonatype.com/artifact/io.github.zsqw123/kni-api)
+[Maven Central: kni-api](https://central.sonatype.com/artifact/host.bytedance/kni-api)
 
-![Maven Central](https://img.shields.io/maven-central/v/io.github.zsqw123/kni-api)
+![Maven Central](https://img.shields.io/maven-central/v/host.bytedance/kni-api)
 
 1. apply [KSP](https://github.com/google/ksp) to your project:
     ```kotlin
@@ -123,12 +123,12 @@ in these cases, `10 μs` may be acceptable.
     ```kotlin
     commonMain {
         dependencies {
-            implementation("io.github.zsqw123:kni-api:<version>")
+            implementation("host.bytedance:kni-api:<version>")
         }
     }
     
     dependencies {
-        val kniKspPath = "io.github.zsqw123:kni-ksp:<version>"
+        val kniKspPath = "host.bytedance:kni-ksp:<version>"
         // your jvm platform target, here is a sample
         add("kspJvm", kniKspPath)
         // your native platform target, here is windows x64 sample
