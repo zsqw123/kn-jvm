@@ -2,10 +2,12 @@ package zsu.kni
 
 /**
  * mark a function can split api/impl in different platforms.
+ *
+ * NOTE: This annotation is useless currently
  */
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.SOURCE)
-annotation class JniShared
+//@Target(AnnotationTarget.FUNCTION)
+//@Retention(AnnotationRetention.SOURCE)
+//annotation class JniShared
 
 /**
  * mark a function as an api function, it will be implemented in another platform.
