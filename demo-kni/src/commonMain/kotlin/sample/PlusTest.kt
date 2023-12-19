@@ -7,10 +7,13 @@ import zsu.kni.JniShared
 expect fun nativePlus(a: Int, b: Foo): Bar
 
 @JniShared
+expect fun triggerJvmPlus(a: Int, b: Foo): Bar
+
+@JniShared
 expect fun jvmPlus(a: Int, b: Foo): Bar
 
 @Serializable
-class Foo(val v: String)
+data class Foo(val v: String)
 
 @Serializable
-class Bar(val v: String)
+data class Bar(val v: String)
