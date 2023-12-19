@@ -10,7 +10,6 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.TypeName
 import zsu.kni.JniApi
 import zsu.kni.JniImpl
-import zsu.kni.JniShared
 
 val jniApiFqn: String = JniApi::class.java.name
 val jniImplFqn: String = JniImpl::class.java.name

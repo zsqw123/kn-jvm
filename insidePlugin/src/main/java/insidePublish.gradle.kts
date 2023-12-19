@@ -50,7 +50,7 @@ if (needPublish) publishing {
 
     afterEvaluate {
         publications.withType<MavenPublication> {
-            groupId = "io.github.zsqw123"
+            groupId = "host.bytedance"
             version = kniVersion
             val artifactName = name
             artifactId = if (isJvmPublish || ("kotlinMultiplatform" == artifactName)) {
