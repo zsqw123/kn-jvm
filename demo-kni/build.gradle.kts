@@ -45,5 +45,3 @@ commonMainDependencies {
 ksp {
     arg("kni-jni-package", "zsu.jni")
 }
-
-addsKspDependsOn("jvm", "mingwX64")

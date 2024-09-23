@@ -47,6 +47,8 @@ fun main() {
     assert(expectJvmResult == actualResult) {
         "expect: $expectJvmResult, actual: $actualResult"
     }
+
+    println("all passed")
 }
 
 @Volatile
