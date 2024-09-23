@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 
 @Suppress("ConstPropertyName")
 object D {
-    const val ksp = "com.google.devtools.ksp:symbol-processing-api:1.9.21-1.0.16"
+    const val ksp = "com.google.devtools.ksp:symbol-processing-api:2.0.20-1.0.25"
     private const val poetVersion = "1.14.2"
     const val poet = "com.squareup:kotlinpoet:$poetVersion"
     const val poetKsp = "com.squareup:kotlinpoet-ksp:$poetVersion"

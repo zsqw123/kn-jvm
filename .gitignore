@@ -40,3 +40,5 @@ bin/
 
 /local.properties
 /publish.properties
+
+.kotlin
