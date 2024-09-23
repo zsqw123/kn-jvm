@@ -23,7 +23,7 @@ fun Project.configJniInterop(
 }
 
 fun Project.addsNativeLibToJniSources(library: SharedLibrary): KotlinNativeLink {
-    val linkTask = library.linkTask
+    val linkTask = library.linkTaskProvider.get()
     linkTask.doLast {
         copy {
             from(library.outputFile)
