@@ -152,6 +152,15 @@ in these cases, `10 μs` may be acceptable.
 
 > or take a look at demo project here: [demo-kni](demo-kni)
 
+#### Version Alignment
+
+Recommended version alignments:
+
+| Kotlin | kn-jvm version |
+|--------|----------------|
+| 1.9.x  | 0.0.2-beta     |
+| 2.0.20 | \>= 0.0.3-beta |
+
 #### How to run Kotlin/Native codes from jvm?
 
 You need to load native libraries which produced by Kotlin/Native sourceSets manually, and it is not autoload by this
